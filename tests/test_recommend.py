@@ -1,7 +1,7 @@
-from ecdat.domain.enums import Confidence, Primitive, QuantumStatus
-from ecdat.domain.models import CryptoAsset, Detection
-from ecdat.domain.recommend import recommend
-from ecdat.knowledge import get_kb
+from cryptonex.domain.enums import Confidence, Primitive, QuantumStatus
+from cryptonex.domain.models import CryptoAsset, Detection
+from cryptonex.domain.recommend import recommend
+from cryptonex.knowledge import get_kb
 
 RULES = get_kb().pqc_rules()
 

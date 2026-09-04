@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Benchmark ECDAT against real open-source repositories.
+"""Benchmark CRYPTONEX against real open-source repositories.
 
 Clones a curated set of small, well-known crypto-adjacent projects, scans each,
 and writes a summary table plus a precision spot-check sheet (a random sample of
@@ -19,7 +19,7 @@ import tempfile
 import time
 from pathlib import Path
 
-from ecdat.core.orchestrator import run_scan
+from cryptonex.core.orchestrator import run_scan
 
 REPOS = [
     ("pyjwt",              "https://github.com/jpadilla/pyjwt",            "JWT — signing / alg handling"),
@@ -54,7 +54,7 @@ def main() -> int:
 
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
-    work = Path(tempfile.mkdtemp(prefix="ecdat-bench-"))
+    work = Path(tempfile.mkdtemp(prefix="cryptonex-bench-"))
     rows = []
     spot: list[tuple] = []
     skipped = []
@@ -95,7 +95,7 @@ def main() -> int:
         shutil.rmtree(work, ignore_errors=True)
 
     # summary table
-    md = ["# ECDAT benchmark — real open-source repositories\n",
+    md = ["# CRYPTONEX benchmark — real open-source repositories\n",
           f"_{len(rows)} repositories scanned"
           + (f", {len(skipped)} skipped (offline): {', '.join(skipped)}" if skipped else "")
           + "._\n",
@@ -115,7 +115,7 @@ def main() -> int:
     # spot-check sheet
     random.seed(42)
     sample = random.sample(spot, min(SPOT_CHECK_N, len(spot)))
-    sc = ["# ECDAT precision spot-check\n",
+    sc = ["# CRYPTONEX precision spot-check\n",
           "Mark each row **TP** (true positive) or **FP** (false positive) by hand, "
           "then compute precision = TP / (TP + FP).\n",
           "| # | kind | repo | what | detail | conf/sev | location | TP/FP |",

@@ -1,16 +1,16 @@
-# Analyzing your own codebase with ECDAT
+# Analyzing your own codebase with CRYPTONEX
 
-ECDAT reads a **directory of source code** (plus its dependency manifests and certificate
+CRYPTONEX reads a **directory of source code** (plus its dependency manifests and certificate
 files) and produces a cryptographic inventory + post-quantum risk assessment.
 **Nothing is uploaded anywhere** — the scan runs on your machine. "Upload a zip" in the
-console just means ECDAT unpacks it into a local temp folder and scans it there.
+console just means CRYPTONEX unpacks it into a local temp folder and scans it there.
 
 ---
 
 ## 0. Fastest path — scan from the console
 
 ```bash
-ecdat serve                     # opens http://localhost:8713 on the "Scan" page
+cryptonex serve                     # opens http://localhost:8713 on the "Scan" page
 ```
 
 On the **Scan** page:
@@ -23,7 +23,7 @@ Results appear immediately (Overview / Inventory / Mosca Lab) and you can downlo
 With Docker, mount your code and point the path box at the mount:
 
 ```bash
-docker run --rm -p 8713:8713 -v "/path/to/your/repo":/code:ro ecdat:local serve
+docker run --rm -p 8713:8713 -v "/path/to/your/repo":/code:ro cryptonex:local serve
 # then in the browser, Local folder → /code → Run scan
 ```
 
@@ -35,10 +35,10 @@ docker run --rm -p 8713:8713 -v "/path/to/your/repo":/code:ro ecdat:local serve
 |---|---|
 | A local folder | scan the folder directly |
 | A Git repository | `git clone <url>` first, then scan the folder |
-| A monorepo | scan the repo root, or a sub-path (`ecdat scan services/payments`) |
-| A built container image | `docker save img:tag -o img.tar` then `ecdat scan img.tar` — layers are unpacked and scanned in place |
+| A monorepo | scan the repo root, or a sub-path (`cryptonex scan services/payments`) |
+| A built container image | `docker save img:tag -o img.tar` then `cryptonex scan img.tar` — layers are unpacked and scanned in place |
 
-ECDAT recognises: `.py .java .kt .js .ts .go .c .cpp .h`, config files
+CRYPTONEX recognises: `.py .java .kt .js .ts .go .c .cpp .h`, config files
 (`.conf .cnf .yaml .yml .ini .properties .toml`), shell scripts, dependency manifests
 (`requirements.txt`, `Pipfile`, `pyproject.toml`, `package.json`, `pom.xml`, `build.gradle`,
 `go.mod`), and certificate/key files (`.pem .crt .cer .der .key .pub`).
@@ -50,23 +50,23 @@ ECDAT recognises: `.py .java .kt .js .ts .go .c .cpp .h`, config files
 ### A. Docker (recommended — nothing to install but Docker)
 
 ```bash
-docker build -t ecdat:local .            # once
+docker build -t cryptonex:local .            # once
 
-mkdir -p ecdat-out
+mkdir -p cryptonex-out
 docker run --rm --user "$(id -u):$(id -g)" \
   -v "/path/to/your/repo":/scan:ro \
-  -v "$PWD/ecdat-out":/out \
-  ecdat:local scan /scan --out /out
+  -v "$PWD/cryptonex-out":/out \
+  cryptonex:local scan /scan --out /out
 ```
 
 > `--user "$(id -u):$(id -g)"` makes the container write the output as *you*, not root.
-> Pre-create `ecdat-out` so the mount exists.
+> Pre-create `cryptonex-out` so the mount exists.
 
 Then open the console:
 
 ```bash
-docker run --rm -p 8713:8713 -v "$PWD/ecdat-out":/out \
-  ecdat:local serve --result /out/result.json --port 8713
+docker run --rm -p 8713:8713 -v "$PWD/cryptonex-out":/out \
+  cryptonex:local serve --result /out/result.json --port 8713
 # → http://localhost:8713
 ```
 
@@ -75,16 +75,16 @@ Or with the Makefile: `make docker && make docker-scan DIR=/path/to/your/repo &&
 ### B. Installed CLI
 
 ```bash
-pipx install ecdat            # or: pip install -e ".[gui]"
-ecdat scan /path/to/your/repo --out ecdat-out
-ecdat serve                   # console on :8713
+pipx install cryptonex            # or: pip install -e ".[gui]"
+cryptonex scan /path/to/your/repo --out cryptonex-out
+cryptonex serve                   # console on :8713
 ```
 
 ### C. From the clone
 
 ```bash
 make dev                              # venv + install
-make scan DIR=/path/to/your/repo      # → ecdat-out/
+make scan DIR=/path/to/your/repo      # → cryptonex-out/
 make ui
 ```
 
@@ -96,7 +96,7 @@ The risk numbers depend on **Mosca's inequality** — `X + Y > Z − now`. Defau
 `X` = per data-classification, `Y` = per remediation effort, `Z` = 2032. Override:
 
 ```bash
-ecdat scan <repo> \
+cryptonex scan <repo> \
   --crqc-year 2030 \       # Z — when you assume a quantum computer arrives
   --x 15 \                 # X — years your most sensitive data must stay secret
   --y 4                    # Y — years your org needs to migrate
@@ -106,7 +106,7 @@ Or model interactively in the console's **Mosca Lab** — three sliders + preset
 (NIST baseline / Optimistic / Regulator EU-2030) that recompute the whole estate live.
 
 Data classification is inferred from paths (`auth/`, `payment/`, `vault/`, `kms/` → higher
-sensitivity; `test/`, `fixture/` → lower). Edit `ecdat/knowledge/policy.yaml` to tune it.
+sensitivity; `test/`, `fixture/` → lower). Edit `cryptonex/knowledge/policy.yaml` to tune it.
 
 ---
 
@@ -114,10 +114,10 @@ sensitivity; `test/`, `fixture/` → lower). Edit `ecdat/knowledge/policy.yaml` 
 
 | File | What it is | Use it for |
 |---|---|---|
-| `ecdat-out/cbom.json` | **CycloneDX 1.6 Cryptographic Bill of Materials** — every asset, its evidence, the dependency graph, `ecdat:` risk properties | Feed to a GRC platform, an auditor, or a later migration tool. The interchange format. |
-| `ecdat-out/report.html` (`.pdf` with WeasyPrint) | Executive & audit report — posture grade, top risks, HNDL exposure, per-critical-asset detail, **migration plan grouped by effort** | Hand to leadership / an auditor / put in a submission |
-| `ecdat-out/result.json` | The full `ScanResult` — assets, graph, posture, coverage | SIEM / data lake ingestion; the console reads this |
-| `ecdat serve` console | Interactive — Overview, Inventory (filter + inspect evidence + recommendation), Mosca Lab, Coverage | Exploring the findings, demoing, tuning assumptions |
+| `cryptonex-out/cbom.json` | **CycloneDX 1.6 Cryptographic Bill of Materials** — every asset, its evidence, the dependency graph, `cryptonex:` risk properties | Feed to a GRC platform, an auditor, or a later migration tool. The interchange format. |
+| `cryptonex-out/report.html` (`.pdf` with WeasyPrint) | Executive & audit report — posture grade, top risks, HNDL exposure, per-critical-asset detail, **migration plan grouped by effort** | Hand to leadership / an auditor / put in a submission |
+| `cryptonex-out/result.json` | The full `ScanResult` — assets, graph, posture, coverage | SIEM / data lake ingestion; the console reads this |
+| `cryptonex serve` console | Interactive — Overview, Inventory (filter + inspect evidence + recommendation), Mosca Lab, Coverage | Exploring the findings, demoing, tuning assumptions |
 
 **Reading the CLI summary:**
 
@@ -141,7 +141,7 @@ Each unsafe asset gets a **specific target**: RSA-sign → `ML-DSA-65`, key exch
 ## 5. Put it in CI
 
 ```bash
-ecdat scan . --format sarif,cbom --fail-on vulnerable
+cryptonex scan . --format sarif,cbom --fail-on vulnerable
 # exit 1 if any asset is vulnerable/broken → blocks the merge
 # exit 0 otherwise
 ```
@@ -162,7 +162,7 @@ artefact so you track crypto drift over time. (SARIF output + GitHub PR annotati
 ## 7. Worked example — scanning a real library
 
 ```bash
-$ ecdat scan $(python -c "import cryptography,os;print(os.path.dirname(cryptography.__file__))")
+$ cryptonex scan $(python -c "import cryptography,os;print(os.path.dirname(cryptography.__file__))")
 
 Posture A (96/100)  ·  6 assets  ·  1 vulnerable  3 broken
   37  SHA-1     broken      x509/extensions.py

@@ -1,13 +1,13 @@
-# ECDAT — Demo walkthrough
+# CRYPTONEX — Demo walkthrough
 
 A verified 5-minute demo. Everything below was run against the Docker image
-(`ecdat:local`) with a real `.zip` upload, driven end-to-end and screenshotted.
+(`cryptonex:local`) with a real `.zip` upload, driven end-to-end and screenshotted.
 
 ## Setup (once)
 
 ```bash
-docker build -t ecdat:local .
-docker run -d --name ecdat -p 8713:8713 ecdat:local serve --port 8713
+docker build -t cryptonex:local .
+docker run -d --name cryptonex -p 8713:8713 cryptonex:local serve --port 8713
 # → http://localhost:8713
 ```
 
@@ -24,7 +24,7 @@ nginx + strongSwan config, and three real X.509 certs including an expired one).
 Open `http://localhost:8713` → lands on the **Scan** page.
 `![](demo/demo-01-scan-page.png)`
 
-> "ECDAT runs locally. Point it at a folder, or — for this demo — drop a zip of the repo."
+> "CRYPTONEX runs locally. Point it at a folder, or — for this demo — drop a zip of the repo."
 
 Go to the **Upload a .zip** tab → drop `demo-repo.zip`.
 `![](demo/demo-02-zip-uploaded.png)`
@@ -78,21 +78,21 @@ Sidebar → **Scan** → download buttons.
 `![](demo/demo-07-downloads.png)`
 
 - **`cbom.json`** — CycloneDX 1.6 Cryptographic Bill of Materials (28 components, evidence,
-  dependency graph, `ecdat:` risk properties). "This is the interchange format — feeds a
+  dependency graph, `cryptonex:` risk properties). "This is the interchange format — feeds a
   GRC platform or an auditor."
 - **`report.html`** — executive summary + migration plan grouped by effort.
 - **`result.json`** — the full scan for a SIEM.
 
 Close with:
 
-> "Same engine in CI: `ecdat scan . --fail-on vulnerable` exits non-zero and blocks the
+> "Same engine in CI: `cryptonex scan . --fail-on vulnerable` exits non-zero and blocks the
 > merge on any new quantum-vulnerable crypto in a critical path. Offline, free, and aligned
 > to India's National Quantum Mission roadmap — cryptographic inventories are mandated for
 > critical sectors by December 2027."
 
 ---
 
-## Verified on Docker (`ecdat:local`)
+## Verified on Docker (`cryptonex:local`)
 
 | Path | Result |
 |---|---|

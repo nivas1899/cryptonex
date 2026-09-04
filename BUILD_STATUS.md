@@ -1,7 +1,7 @@
-# ECDAT — Build Status
+# CRYPTONEX — Build Status
 
 **Working end-to-end.** ~3,500 LOC Python + a versioned YAML Knowledge Base. **37 tests pass.**
-Verified on the Docker image (`ecdat:local`).
+Verified on the Docker image (`cryptonex:local`).
 
 See `docs/CAPABILITIES.md` for the full capability list and the comparison vs. IBM / SandboxAQ.
 
@@ -34,7 +34,7 @@ See `docs/CAPABILITIES.md` for the full capability list and the comparison vs. I
 - **Credibility layer** — every asset carries an `AssessmentBasis`: **Observed** (evidence-backed,
   with detection confidence) vs **Knowledge-base** (deterministic, cited) vs **Inferred** (heuristic —
   criticality / data-class / external-exposure, with the reasoning) vs **Assumed** (X / Y / Z). Shown
-  in the console asset detail, the report, and as `ecdat:*Basis` properties in the CBOM.
+  in the console asset detail, the report, and as `cryptonex:*Basis` properties in the CBOM.
 - **Test-code handling** — test-vector corpora (`vectors/`, `wycheproof/`, …) skipped; assets/findings
   whose every location is a test/example/fixture path are inventoried but **excluded from the grade**.
 - **Real-OSS benchmark** — `scripts/benchmark.py` scans 7 real projects (PyJWT, paramiko, python-jose,
@@ -45,13 +45,13 @@ See `docs/CAPABILITIES.md` for the full capability list and the comparison vs. I
 ## What runs today
 
 ```bash
-cd /home/nivx/SIH/ecdat
+cd /home/nivx/SIH/cryptonex
 python3 -m venv .venv && . .venv/bin/activate
 pip install -e ".[dev]"
 
-ecdat scan tests/fixtures/vulnerable-repo      # → ecdat-out/{cbom.json, report.html, result.json}
-ecdat serve                                     # → local Streamlit console on :8713
-ecdat kb                                        # knowledge base info
+cryptonex scan tests/fixtures/vulnerable-repo      # → cryptonex-out/{cbom.json, report.html, result.json}
+cryptonex serve                                     # → local Streamlit console on :8713
+cryptonex kb                                        # knowledge base info
 pytest -q                                       # 21 passing
 ```
 
@@ -69,7 +69,7 @@ TLS/IPsec key exchange → ML-KEM-768 hybrid, 3DES → AES-256-GCM, PBKDF2-SHA1 
 | **Scanners** | `source` (7 languages, regex rules), `dependency` (pip/npm/maven/go), `certificate` (X.509 PEM/DER, keys → fingerprint only) | ✅ |
 | **Core** | `normalize` (identity + merge + graph), `enrich` (status · criticality · lifetime · Mosca), `orchestrator` | ✅ |
 | **Reporters** | `cbom` (CycloneDX 1.6, deterministic serial), `report` (HTML → PDF if WeasyPrint present), `json_out` | ✅ |
-| **CLI** | `ecdat scan / serve / kb / version` — `--crqc-year`, `--x`, `--y`, `--scanners`, `--fail-on`, `--no-timestamp` | ✅ |
+| **CLI** | `cryptonex scan / serve / kb / version` — `--crqc-year`, `--x`, `--y`, `--scanners`, `--fail-on`, `--no-timestamp` | ✅ |
 | **GUI** | Streamlit console — Overview / Inventory (filter + inspect) / Mosca Lab (live X·Y·Z + presets) / Coverage | ✅ |
 | **Packaging** | `Dockerfile` (multi-stage, non-root), `Makefile`, `compose.yaml`, `.dockerignore` | ✅ |
 | **Tests** | `test_risk` (Mosca + scoring + monotonicity), `test_recommend` (rule coverage), `test_pipeline` (recall of 14 planted assets, CBOM structure + determinism) | ✅ 21 pass |

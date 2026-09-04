@@ -2,8 +2,8 @@ from pathlib import Path
 
 import pytest
 
-from ecdat.core.orchestrator import run_scan
-from ecdat.knowledge import get_kb
+from cryptonex.core.orchestrator import run_scan
+from cryptonex.knowledge import get_kb
 
 FIXTURE = Path(__file__).parent / "fixtures" / "vulnerable-repo"
 
@@ -81,7 +81,7 @@ def test_container_image_scanned(result):
 
 
 def test_container_scan_direct():
-    from ecdat.core.orchestrator import run_scan
+    from cryptonex.core.orchestrator import run_scan
     img = Path(__file__).parent / "fixtures" / "payments-api-image.tar"
     r = run_scan(str(img), crqc_year=2032, now_year=2026)
     assert r.assets and all(".tar!" in loc.component

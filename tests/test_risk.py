@@ -1,6 +1,6 @@
-from ecdat.domain.enums import Confidence, Criticality, Primitive, QuantumStatus
-from ecdat.domain.models import CryptoAsset, Detection, MoscaInputs
-from ecdat.domain.risk import assess, mosca, posture_score
+from cryptonex.domain.enums import Confidence, Criticality, Primitive, QuantumStatus
+from cryptonex.domain.models import CryptoAsset, Detection, MoscaInputs
+from cryptonex.domain.risk import assess, mosca, posture_score
 
 
 def _asset(**kw):

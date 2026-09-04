@@ -16,7 +16,7 @@ Devices that hold private keys in tamper-resistant hardware — network HSMs (Th
 Luna, Entrust nShield, AWS/Azure Cloud HSM), TPMs, PKCS#11 tokens, smartcards. You
 cannot extract the key material; you enumerate the *objects* and their attributes.
 
-### What ECDAT would report
+### What CRYPTONEX would report
 Per token/slot: each key object's **type** (RSA / EC / AES), **size / curve**,
 **label & ID**, and **allowed operations** (`CKA_SIGN`, `CKA_DECRYPT`, `CKA_WRAP`) →
 one `CryptoAsset` with `asset_type = hardware-module`, then the normal quantum-status +
@@ -29,9 +29,9 @@ Shor-vulnerable — the HSM protects it from extraction, not from a quantum comp
 | Binding | `python-pkcs11` **or** `PyKCS11` (both maintained OSS) |
 | Also | `PyKMIP` for network HSMs that speak KMIP; `python-tss` for TPM 2.0 |
 | Runtime input | the vendor's PKCS#11 module path (`/usr/lib/softhsm/libsofthsm2.so`, `libCryptoki2_64.so`, …) + the slot **PIN** from the operator — used, never stored |
-| CLI | `ecdat scan --scanners hsm --pkcs11-module <path> --slot 0` |
+| CLI | `cryptonex scan --scanners hsm --pkcs11-module <path> --slot 0` |
 | Test double | **SoftHSM2** (`apt install softhsm2`) — a free software HSM; a fixture script creates a token with a few keys so the scanner is fully testable offline in CI |
-| New code | `ecdat/scanners/hsm.py` (~120 lines): open module → `get_slots()` → per token `get_objects({ObjectClass: PRIVATE_KEY / CERTIFICATE / SECRET_KEY})` → read attributes → `RawFinding` |
+| New code | `cryptonex/scanners/hsm.py` (~120 lines): open module → `get_slots()` → per token `get_objects({ObjectClass: PRIVATE_KEY / CERTIFICATE / SECRET_KEY})` → read attributes → `RawFinding` |
 | Effort | ~1–1.5 days incl. SoftHSM fixture + tests |
 
 ### Why it's deferred
@@ -48,7 +48,7 @@ Managed cryptography in the cloud:
 - **Azure** — Key Vault (keys/certs/secrets), Managed HSM, Application Gateway TLS
 - **GCP** — Cloud KMS, Certificate Manager, Cloud HSM
 
-### What ECDAT would report
+### What CRYPTONEX would report
 Read-only `List*` + `Describe*` calls → per key: **key spec** (`RSA_2048`,
 `ECC_NIST_P256`, `SYMMETRIC_DEFAULT`), **origin** (AWS_KMS vs external vs CloudHSM),
 **usage** (ENCRYPT_DECRYPT / SIGN_VERIFY), rotation status; per cert: signature &
@@ -63,9 +63,9 @@ catching the RSA-2048 signing keys and old TLS policies).
 |---|---|
 | SDKs | `boto3` (AWS) · `azure-identity` + `azure-keyvault-keys` + `azure-keyvault-certificates` + `azure-mgmt-network` (Azure) · `google-cloud-kms` + `google-cloud-certificate-manager` (GCP) |
 | Runtime input | a **read-only** role/profile from the operator: `kms:List*/Describe*`, `acm:List*/Describe*`, `elasticloadbalancing:Describe*` (AWS) — supplied via the normal SDK credential chain, never stored |
-| CLI | `ecdat scan --scanners cloud.aws --profile prod --region ap-south-1` |
+| CLI | `cryptonex scan --scanners cloud.aws --profile prod --region ap-south-1` |
 | Test double | **`moto`** (AWS mock, pure-Python, free) or **LocalStack** — CI seeds fake KMS keys / ACM certs and asserts the scanner catalogues them; Azure has `azure-mock`-style fixtures |
-| New code | `ecdat/scanners/cloud/aws.py`, `.../azure.py`, `.../gcp.py` — ~100–150 lines each; paginate, describe, map key-spec → family/params |
+| New code | `cryptonex/scanners/cloud/aws.py`, `.../azure.py`, `.../gcp.py` — ~100–150 lines each; paginate, describe, map key-spec → family/params |
 | Effort | ~1 day for AWS (do first — largest footprint), ~1 day each for Azure & GCP |
 
 ### Why it's deferred
@@ -80,10 +80,10 @@ A **bring-your-own-export** scanner — offline, no credentials:
 
 ```bash
 aws kms list-keys | aws kms describe-key ...   # operator runs this themselves
-ecdat scan --scanners cloud.import --import kms-export.json
+cryptonex scan --scanners cloud.import --import kms-export.json
 ```
 
-`ecdat/scanners/cloud_import.py` (~60 lines) reads a JSON/CSV the operator exports from
+`cryptonex/scanners/cloud_import.py` (~60 lines) reads a JSON/CSV the operator exports from
 their cloud CLI (or a KMIP inventory dump) and turns each row into a `cloud-service`
 `CryptoAsset`. This is a legitimate M1.5 capability, fully offline, and lets the demo
 show a cloud KMS inventory from a sample file. If you have half a day spare after

@@ -3,9 +3,9 @@ from pathlib import Path
 
 import pytest
 
-from ecdat.core.orchestrator import run_scan
-from ecdat.domain.enums import QuantumStatus
-from ecdat.reporters.cbom import to_cbom
+from cryptonex.core.orchestrator import run_scan
+from cryptonex.domain.enums import QuantumStatus
+from cryptonex.reporters.cbom import to_cbom
 
 FIXTURE = Path(__file__).parent / "fixtures" / "vulnerable-repo"
 

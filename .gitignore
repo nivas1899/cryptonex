@@ -1,5 +1,5 @@
 .venv/
-ecdat-out/
+cryptonex-out/
 dist/
 build/
 *.egg-info/

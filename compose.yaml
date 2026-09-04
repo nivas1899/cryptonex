@@ -1,12 +1,12 @@
 # Scan the mounted directory, then serve the console.
 services:
-  ecdat:
+  cryptonex:
     build: .
     command: >
-      sh -c "ecdat scan /scan --out /out &&
-             ecdat serve --result /out/result.json --port 8713"
+      sh -c "cryptonex scan /scan --out /out &&
+             cryptonex serve --result /out/result.json --port 8713"
     ports:
       - "8713:8713"
     volumes:
       - ${SCAN_DIR:-./tests/fixtures/vulnerable-repo}:/scan:ro
-      - ./ecdat-out:/out
+      - ./cryptonex-out:/out

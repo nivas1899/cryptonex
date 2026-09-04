@@ -3,13 +3,13 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "ecdat"
+name = "cryptonex"
 version = "0.9.0"
-description = "Enterprise Cryptographic Discovery & Analysis Tool — cryptographic inventory, post-quantum risk assessment, and migration recommendations."
+description = "CRYPTONEX — cryptographic discovery, post-quantum risk assessment, and migration planning."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "Apache-2.0" }
-authors = [{ name = "Team ECDAT" }]
+authors = [{ name = "Team CRYPTONEX" }]
 dependencies = [
     "pydantic>=2.6",
     "pyyaml>=6.0",
@@ -25,11 +25,11 @@ validate = ["jsonschema>=4.17"]
 dev = ["pytest>=8.0", "jsonschema>=4.17", "streamlit>=1.30", "pandas>=2.0", "lief>=0.14"]
 
 [project.scripts]
-ecdat = "ecdat.cli:app"
+cryptonex = "cryptonex.cli:app"
 
 [tool.hatch.build.targets.wheel]
-packages = ["ecdat"]
-artifacts = ["ecdat/knowledge/**/*.yaml"]
+packages = ["cryptonex"]
+artifacts = ["cryptonex/knowledge/**/*.yaml"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

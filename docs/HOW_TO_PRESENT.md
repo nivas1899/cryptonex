@@ -1,4 +1,4 @@
-# How to present ECDAT — framing, demo spine, and judge Q&A
+# How to present CRYPTONEX — framing, demo spine, and judge Q&A
 
 Distilled from an external review. The goal: the judge remembers *"they showed me
 exactly where quantum risk is, why it matters, and what to do about it"* — not
@@ -14,7 +14,7 @@ Then, in three sentences:
 
 > Enterprises have no single inventory of where cryptography is used — it is scattered
 > across source code, dependencies, certificates, binaries and container images.
-> ECDAT discovers that cryptographic footprint, assesses its exposure to a future
+> CRYPTONEX discovers that cryptographic footprint, assesses its exposure to a future
 > quantum computer, and turns it into an actionable migration plan.
 > India's National Quantum Mission mandates exactly this inventory for critical sectors
 > by December 2027.
@@ -59,7 +59,7 @@ recompute, the CBOM/SARIF export.
 > separate production findings from test-fixture findings."
 
 **"How do you know this cryptographic usage actually protects sensitive data?"**
-> "We don't claim to. ECDAT separates **observed evidence** from **inferred risk**.
+> "We don't claim to. CRYPTONEX separates **observed evidence** from **inferred risk**.
 > The algorithm, parameters and location are observed. Business criticality, data
 > classification and external exposure are heuristic inferences from path and config
 > signals — the report labels them as such and shows the reasoning. They're a
@@ -74,7 +74,7 @@ recompute, the CBOM/SARIF export.
 **"Why 2032 for the quantum computer? Who decides X, Y, Z?"**
 > "Nobody in the tool decides it. X, Y and Z are **configurable assumptions**. The
 > Mosca Lab lets an organisation model their own — we ship NIST-baseline, optimistic,
-> and EU-2030-regulator presets. ECDAT doesn't predict a date; it performs a
+> and EU-2030-regulator presets. CRYPTONEX doesn't predict a date; it performs a
 > transparent scenario analysis and re-scores the estate live."
 
 **"What about variable indirection, wrapper functions, dynamic imports, generated code?"**
@@ -85,7 +85,7 @@ recompute, the CBOM/SARIF export.
 **"Your CVE data — what happens when a vulnerability drops tomorrow?"**
 > "The detection knowledge base — rules, algorithms, libraries, advisories — is
 > **versioned independently** from the scanner engine, so it updates without an
-> engine release. The current build ships an offline snapshot on purpose: ECDAT is
+> engine release. The current build ships an offline snapshot on purpose: CRYPTONEX is
 > designed to run air-gapped."
 
 **"Can you scan AWS KMS / an HSM right now?"**
@@ -98,7 +98,7 @@ recompute, the CBOM/SARIF export.
 
 **"Isn't this just cbomkit / IBM Guardium?"**
 > "cbomkit scans three languages of source and stops at a flat list. IBM and SandboxAQ
-> are $100k+/year foreign SaaS covering only part of the surface. ECDAT is free,
+> are $100k+/year foreign SaaS covering only part of the surface. CRYPTONEX is free,
 > offline, unified across all five scan targets, and adds the parts nobody else does:
 > **threat finding** (28 CWE-mapped misuse rules), a **crypto-agility index**,
 > **migration waves**, and **India NQM roadmap mapping**."

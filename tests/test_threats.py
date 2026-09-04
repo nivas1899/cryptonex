@@ -3,9 +3,9 @@ from pathlib import Path
 
 import pytest
 
-from ecdat.core.orchestrator import run_scan
-from ecdat.domain.enums import Severity
-from ecdat.reporters.sarif import to_sarif
+from cryptonex.core.orchestrator import run_scan
+from cryptonex.domain.enums import Severity
+from cryptonex.reporters.sarif import to_sarif
 
 FIXTURE = Path(__file__).parent / "fixtures" / "vulnerable-repo"
 
@@ -75,7 +75,7 @@ def test_pqc_readiness_populated(result):
 
 
 def test_cbom_has_vulnerabilities(result):
-    from ecdat.reporters.cbom import to_cbom
+    from cryptonex.reporters.cbom import to_cbom
     doc = json.loads(to_cbom(result))
     assert len(doc["vulnerabilities"]) == len(result.findings)
     for v in doc["vulnerabilities"]:
@@ -86,7 +86,7 @@ def test_sarif_valid(result):
     doc = json.loads(to_sarif(result))
     assert doc["version"] == "2.1.0"
     run = doc["runs"][0]
-    assert run["tool"]["driver"]["name"] == "ECDAT"
+    assert run["tool"]["driver"]["name"] == "CRYPTONEX"
     assert run["results"]
     rule_ids = {r["id"] for r in run["tool"]["driver"]["rules"]}
     for res in run["results"]:
@@ -96,7 +96,7 @@ def test_sarif_valid(result):
 
 
 def test_expanded_kb_families():
-    from ecdat.knowledge import get_kb
+    from cryptonex.knowledge import get_kb
     fams = get_kb().algorithms["families"]
     for f in ("ML-KEM", "SLH-DSA", "Camellia", "SM4", "XMSS", "Ed448"):
         assert f in fams

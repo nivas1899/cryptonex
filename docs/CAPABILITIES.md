@@ -1,4 +1,4 @@
-# ECDAT capabilities
+# CRYPTONEX capabilities
 
 What the tool does today, and how it lines up against the commercial post-quantum
 discovery tools.
@@ -47,14 +47,14 @@ Every finding carries a CWE, a plain-language description, and a concrete fix.
 
 | Format | Purpose |
 |---|---|
-| **CycloneDX 1.6 CBOM** | crypto components + `cryptoProperties` + dependency graph + `vulnerabilities` array (the misuse findings) + `ecdat:` risk/agility properties. Deterministic serial. |
+| **CycloneDX 1.6 CBOM** | crypto components + `cryptoProperties` + dependency graph + `vulnerabilities` array (the misuse findings) + `cryptonex:` risk/agility properties. Deterministic serial. |
 | **SARIF 2.1.0** | CI annotations + merge gate — one rule per misuse type and per quantum class, `security-severity` set for code-scanning UIs |
 | **Executive / audit HTML (PDF with WeasyPrint)** | posture, weaknesses, HNDL, PQC readiness, quantum-risk timeline, migration waves |
 | **ScanResult JSON** | complete, for a SIEM / data lake / the console |
 
 ## Positioning vs. the market
 
-| Capability | ECDAT | IBM Guardium Quantum Safe | SandboxAQ | cbomkit (OSS) |
+| Capability | CRYPTONEX | IBM Guardium Quantum Safe | SandboxAQ | cbomkit (OSS) |
 |---|---|---|---|---|
 | Source-code discovery | ✅ 6 languages, 63 rules | ✅ | partial | ✅ 3 langs |
 | Dependency discovery | ✅ 5 ecosystems | ✅ | – | – |
