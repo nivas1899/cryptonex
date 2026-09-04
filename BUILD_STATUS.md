@@ -26,10 +26,21 @@ See `docs/CAPABILITIES.md` for the full capability list and the comparison vs. I
   MAC compare, fixed ECDSA nonce, vulnerable-dependency advisories, …
 - **Hand-rolled-crypto detection** — 28 constant fingerprints
 - **Binary scanner** — ELF/PE/Mach-O via `lief`
+- **Container-image scanner** — unpacks OCI/docker-save layers, scans the merged rootfs
 - **PQC-readiness analytics** — crypto-agility index, migration waves, **India NQM phase mapping**,
   quantum-risk timeline
 - **SARIF 2.1.0** + CBOM `vulnerabilities` array + `--fail-on` covers findings
 - **Console** — **Weaknesses** and **PQC Readiness** views
+- **Credibility layer** — every asset carries an `AssessmentBasis`: **Observed** (evidence-backed,
+  with detection confidence) vs **Knowledge-base** (deterministic, cited) vs **Inferred** (heuristic —
+  criticality / data-class / external-exposure, with the reasoning) vs **Assumed** (X / Y / Z). Shown
+  in the console asset detail, the report, and as `ecdat:*Basis` properties in the CBOM.
+- **Test-code handling** — test-vector corpora (`vectors/`, `wycheproof/`, …) skipped; assets/findings
+  whose every location is a test/example/fixture path are inventoried but **excluded from the grade**.
+- **Real-OSS benchmark** — `scripts/benchmark.py` scans 7 real projects (PyJWT, paramiko, python-jose,
+  the `cryptography` library, …); results + a precision spot-check sheet in `docs/benchmark/`.
+- **Presentation kit** — `docs/HOW_TO_PRESENT.md` (opening line, one-asset demo spine, judge Q&A,
+  overclaim rewrites).
 
 ## What runs today
 
