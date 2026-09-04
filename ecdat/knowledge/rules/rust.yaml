@@ -1,0 +1,64 @@
+language: rust
+extensions: [".rs"]
+rules:
+  - id: rs.sha2
+    regex: '\bSha(?P<n>256|224|384|512)::new\s*\(|use\s+sha2::'
+    raw_name: "sha{n}"
+    confidence: high
+  - id: rs.sha1
+    regex: '\bSha1::new\s*\(|use\s+sha1::'
+    raw_name: sha1
+    confidence: high
+  - id: rs.md5
+    regex: '\bMd5::new\s*\(|use\s+md5::|use\s+md-5::'
+    raw_name: md5
+    confidence: high
+  - id: rs.aesgcm
+    regex: '\bAes(128|256)Gcm\b|use\s+aes_gcm::'
+    raw_name: aesgcm
+    primitive: aead
+    confidence: high
+  - id: rs.aes
+    regex: '\bAes(128|192|256)\b|use\s+aes::'
+    raw_name: aes
+    confidence: medium
+  - id: rs.chacha
+    regex: '\bChaCha20Poly1305\b|\bXChaCha20Poly1305\b|use\s+chacha20poly1305::'
+    raw_name: "chacha20-poly1305"
+    primitive: aead
+    confidence: high
+  - id: rs.rsa
+    regex: '\bRsaPrivateKey::(new|from)|use\s+rsa::'
+    raw_name: rsa
+    primitive: pke
+    confidence: high
+  - id: rs.ed25519
+    regex: '\bed25519_dalek\b|SigningKey::(generate|from_bytes)|use\s+ed25519'
+    raw_name: ed25519
+    primitive: signature
+    confidence: high
+  - id: rs.x25519
+    regex: '\bx25519_dalek\b|EphemeralSecret::(new|random)|use\s+x25519'
+    raw_name: x25519
+    primitive: key-agreement
+    confidence: high
+  - id: rs.p256
+    regex: '\bp256::\b|use\s+p256::'
+    raw_name: ecdsa
+    primitive: signature
+    confidence: medium
+  - id: rs.pqc
+    regex: '\bpqcrypto\b|\bml_kem\b|\bml_dsa\b|use\s+pqcrypto'
+    raw_name: "ml-kem"
+    primitive: kem
+    confidence: medium
+  - id: rs.argon2
+    regex: '\bArgon2::\b|use\s+argon2::'
+    raw_name: argon2id
+    primitive: kdf
+    confidence: high
+  - id: rs.rand_weak
+    regex: '\brand::random\s*\(|thread_rng\s*\(\s*\)\.gen'
+    raw_name: drbg
+    primitive: drbg
+    confidence: low

@@ -64,3 +64,60 @@ rules:
     raw_name: "chacha20-poly1305"
     primitive: aead
     confidence: high
+  - id: go.dsa
+    regex: 'dsa\.(GenerateKey|Sign|Verify)\('
+    raw_name: dsa
+    primitive: signature
+    confidence: high
+  - id: go.dh_ecdh
+    regex: '\becdh\.(P256|P384|P521|X25519)\(\)\.'
+    raw_name: ecdh
+    primitive: key-agreement
+    confidence: high
+  - id: go.tls_version
+    regex: '(MinVersion|MaxVersion)\s*:\s*tls\.Version(?P<v>SSL30|TLS10|TLS11|TLS12|TLS13)'
+    raw_name: ecdh
+    primitive: key-agreement
+    external: true
+    confidence: low
+  - id: go.tls_ciphers
+    regex: 'tls\.TLS_(?P<c>RSA_WITH_[A-Z0-9_]+|ECDHE_[A-Z0-9_]+|AES_128_GCM_SHA256)'
+    raw_name: ecdh
+    primitive: key-agreement
+    external: true
+    confidence: low
+  - id: go.curvepref
+    regex: 'CurvePreferences\s*:\s*\[\]tls\.CurveID\{[^}]*(X25519|CurveP256|CurveP384|X25519MLKEM768)'
+    raw_name: x25519
+    primitive: key-agreement
+    external: true
+    confidence: medium
+  - id: go.pbkdf2
+    regex: 'pbkdf2\.Key\s*\('
+    raw_name: "pbkdf2-hmac-sha256"
+    primitive: kdf
+    confidence: medium
+  - id: go.scrypt
+    regex: 'scrypt\.Key\s*\('
+    raw_name: scrypt
+    primitive: kdf
+    confidence: high
+  - id: go.argon2
+    regex: 'argon2\.(IDKey|Key)\s*\('
+    raw_name: argon2id
+    primitive: kdf
+    confidence: high
+  - id: go.hkdf
+    regex: 'hkdf\.(New|Extract|Expand)\s*\('
+    raw_name: hkdf
+    primitive: kdf
+    confidence: high
+  - id: go.circl_pqc
+    regex: 'circl/(kem|sign)/(mlkem|mldsa|kyber|dilithium)|schemes\.ByName\("(?P<algo>ML-KEM-\d+|ML-DSA-\d+)"'
+    raw_name: "{algo}"
+    confidence: medium
+  - id: go.bcrypt
+    regex: 'bcrypt\.(GenerateFromPassword|CompareHashAndPassword)\('
+    raw_name: bcrypt
+    primitive: kdf
+    confidence: high

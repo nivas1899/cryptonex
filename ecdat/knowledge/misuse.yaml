@@ -54,6 +54,7 @@ rules:
 
   # ---- weak randomness ----
   - id: misuse.rng.python
+    once_per_file: true
     regex: 'random\.(random|randint|randrange|choice|getrandbits|sample|shuffle)\s*\('
     extensions: [".py"]
     title: "Non-cryptographic RNG (random) — use secrets for security values"
@@ -63,6 +64,7 @@ rules:
     description: "The `random` module is a Mersenne-Twister PRNG; its output is predictable. Fine for simulation, not for tokens, keys, nonces, salts, or passwords."
     remediation: "Use `secrets.token_bytes` / `secrets.SystemRandom` for anything security-sensitive."
   - id: misuse.rng.jsmath
+    once_per_file: true
     regex: 'Math\.random\s*\(\s*\)'
     title: "Math.random() is not cryptographically secure"
     severity: medium
@@ -70,6 +72,7 @@ rules:
     cwe: CWE-338
     remediation: "Use crypto.getRandomValues() / crypto.randomBytes()."
   - id: misuse.rng.java
+    once_per_file: true
     regex: 'new\s+java\.util\.Random\s*\(|new\s+Random\s*\(\s*\)'
     extensions: [".java", ".kt", ".scala"]
     title: "java.util.Random used — not cryptographically secure"
@@ -78,6 +81,7 @@ rules:
     cwe: CWE-338
     remediation: "Use java.security.SecureRandom."
   - id: misuse.rng.c
+    once_per_file: true
     regex: '\b(srand|rand)\s*\(|\brandom\s*\(\s*\)'
     extensions: [".c", ".cc", ".cpp", ".cxx", ".h", ".hpp"]
     title: "C rand()/srand() — predictable RNG"
@@ -178,3 +182,64 @@ rules:
     cwe: CWE-353
     description: "CBC without an integrity check is vulnerable to padding-oracle and bit-flipping attacks."
     remediation: "Prefer an AEAD mode (GCM); if CBC is required, apply HMAC over the ciphertext (encrypt-then-MAC)."
+
+  # ---- deprecated primitives named explicitly ----
+  - id: misuse.broken.cipher
+    once_per_file: true
+    regex: '\b(MD2|MD4|RC2|RC4|ARCFOUR|DES(?:ede)?|3DES|TripleDES|Blowfish)\b|["''](?:aes|des|rc4)-?(?:56|128)?-?ecb["'']'
+    title: "Deprecated or weak cipher referenced"
+    severity: medium
+    category: crypto-misuse
+    cwe: CWE-327
+    description: "RC2/RC4/DES/3DES/Blowfish (and ECB mode) are deprecated. Their presence is a migration target."
+    remediation: "Replace with AES-256-GCM / ChaCha20-Poly1305."
+  - id: misuse.tls.legacy_protocol
+    once_per_file: true
+    regex: 'SSLv2|SSLv3|TLSv1(?:\.0)?(?![.\d])|PROTOCOL_TLSv1(?![._\d])|TLS_RSA_WITH|NULL-MD5|EXP-|aNULL|eNULL|ADH-'
+    title: "Legacy TLS protocol / cipher suite (SSLv3, TLS 1.0, RSA-kx, NULL/EXPORT/anon)"
+    severity: high
+    category: crypto-misuse
+    cwe: CWE-326
+    description: "SSLv3 and TLS 1.0/1.1 are deprecated; RSA key exchange has no forward secrecy; NULL/EXPORT/anon suites provide no security."
+    remediation: "Require TLS 1.2+ with ECDHE (or hybrid X25519MLKEM768) key exchange and AEAD suites only."
+  - id: misuse.ssh.weak
+    once_per_file: true
+    extensions: [".conf", ".cnf", ".cfg", ".yaml", ".yml", ".toml", ""]
+    regex: '^\s*(KexAlgorithms|Ciphers|MACs|HostKeyAlgorithms|PubkeyAcceptedAlgorithms|PubkeyAcceptedKeyTypes)\s+.*(ssh-dss|diffie-hellman-group1-sha1|arcfour|blowfish-cbc|hmac-md5|hmac-sha1\b|3des-cbc)'
+    title: "Weak SSH algorithm configured (group1, arcfour, HMAC-MD5, 3des-cbc)"
+    severity: medium
+    category: crypto-misuse
+    cwe: CWE-326
+    remediation: "Use curve25519-sha256 KEX, ssh-ed25519 / rsa-sha2-512 keys, hmac-sha2-256/512-etm MACs; add sntrup761x25519 / mlkem768x25519 for PQC."
+  - id: misuse.cert.selfsigned_pin
+    regex: 'X509_V_FLAG_.*IGNORE|verify_mode\s*=\s*ssl\.CERT_OPTIONAL|OP_NO_TLSv1_1?\b.*OP_NO_TLSv1_2'
+    title: "Relaxed certificate verification flags"
+    severity: high
+    category: cert-validation
+    cwe: CWE-295
+    remediation: "Do not relax X.509 verification; pin a private CA bundle instead."
+  - id: misuse.deserialization
+    once_per_file: true
+    regex: '\b(pickle\.loads?|yaml\.load\s*\((?![^)]*Loader)|cPickle\.loads?|readObject\s*\(|unserialize\s*\()'
+    title: "Insecure deserialization near a trust boundary"
+    severity: medium
+    category: crypto-misuse
+    cwe: CWE-502
+    description: "Deserialising untrusted data can lead to RCE; often sits next to signature-verification code that is meant to protect it."
+    remediation: "Use a safe format (JSON), or verify a MAC/signature over the bytes before deserialising, with a strict allow-list."
+  - id: misuse.hmac.compare
+    regex: '\b(expected_?(hmac|mac|sig|signature|digest)|computed_?(hmac|mac|sig)|(hmac|mac|signature)_?(digest|value)?)\s*==\s*\w|\.equals\s*\(\s*\w*(hmac|signature|mac)\w*\s*\)|strcmp\s*\([^,)]*(hmac|mac|sig)[^,)]*,'
+    title: "MAC / signature compared with a non-constant-time equality"
+    severity: medium
+    category: crypto-misuse
+    cwe: CWE-208
+    description: "Comparing a MAC with `==` / `.equals` / `strcmp` leaks timing usable to forge tags byte-by-byte."
+    remediation: "Use hmac.compare_digest / MessageDigest.isEqual / crypto.timingSafeEqual / subtle.ConstantTimeCompare."
+  - id: misuse.ecdsa.k
+    regex: '\b(k|nonce)\s*=\s*(1|0x1|new BigInteger\("1"\)|deterministicK\s*=\s*false)'
+    title: "ECDSA/DSA nonce (k) looks fixed or non-deterministic-by-choice"
+    severity: high
+    category: crypto-misuse
+    cwe: CWE-330
+    description: "A repeated or predictable ECDSA/DSA nonce leaks the private key (Sony PS3 / Android Bitcoin wallet class of bug)."
+    remediation: "Use RFC 6979 deterministic nonces or a vetted library default; never set k yourself."

@@ -1,0 +1,56 @@
+# Curated crypto-library security advisories (offline snapshot).
+# Matched by the dependency scanner: ecosystem + name + affected version range.
+version: "2026.02"
+advisories:
+  - {id: "CVE-2013-7459", ecosystem: pip, name: pycrypto, affected: "<2.7", severity: high,
+     cwe: CWE-120, title: "PyCrypto heap buffer overflow / unmaintained",
+     description: "PyCrypto is unmaintained since 2013 and has an unpatched overflow in ALGnew.",
+     fix: "Replace with `pycryptodome` or `cryptography`."}
+  - {id: "GHSA-jwv4-jr8j", ecosystem: pip, name: "python-jose", affected: "<3.4.0", severity: high,
+     cwe: CWE-347, title: "algorithm-confusion / DoS in JWT verification",
+     description: "python-jose accepted attacker-controlled algorithms and could be DoS'd via crafted JWE.",
+     fix: "Upgrade python-jose to >= 3.4.0."}
+  - {id: "CVE-2022-29217", ecosystem: pip, name: pyjwt, affected: "<2.4.0", severity: high,
+     cwe: CWE-347, title: "key-confusion when `algorithms` is not pinned",
+     description: "PyJWT allowed a public key to be used as an HMAC secret if algorithms was not restricted.",
+     fix: "Upgrade PyJWT to >= 2.4.0 and pass an explicit `algorithms` list."}
+  - {id: "CVE-2020-26160", ecosystem: go, name: "github.com/dgrijalva/jwt-go", affected: "<4.0.0", severity: high,
+     cwe: CWE-287, title: "authorisation bypass via `aud` type confusion (deprecated library)",
+     description: "dgrijalva/jwt-go mishandles the aud claim when it is a []string, and the library is abandoned.",
+     fix: "Migrate to github.com/golang-jwt/jwt/v5."}
+  - {id: "CVE-2024-45337", ecosystem: go, name: "golang.org/x/crypto", affected: "<0.31.0", severity: high,
+     cwe: CWE-285, title: "golang.org/x/crypto/ssh authorization bypass",
+     description: "Misuse of ServerConfig.PublicKeyCallback could allow authorization bypass.",
+     fix: "Upgrade golang.org/x/crypto to >= 0.31.0."}
+  - {id: "CVE-2023-46809", ecosystem: npm, name: node, affected: "", severity: medium,
+     cwe: CWE-208, title: "Marvin / PKCS#1 v1.5 timing oracle (RSA decryption)",
+     description: "RSA PKCS#1 v1.5 decryption in several stacks is vulnerable to a timing side channel.",
+     fix: "Use RSA-OAEP, or a KEM; avoid PKCS#1 v1.5 decryption."}
+  - {id: "CVE-2024-48948", ecosystem: npm, name: elliptic, affected: "<6.6.0", severity: medium,
+     cwe: CWE-347, title: "ECDSA signature verification flaw",
+     description: "`elliptic` may accept some invalid signatures / leak nonce bits under certain inputs.",
+     fix: "Upgrade elliptic to >= 6.6.0 or move to @noble/curves."}
+  - {id: "GHSA-crypto-js-pbkdf2", ecosystem: npm, name: crypto-js, affected: "<4.2.0", severity: medium,
+     cwe: CWE-916, title: "crypto-js PBKDF2 defaults to 1 iteration / SHA-1",
+     description: "crypto-js PBKDF2 historically defaulted to 1 iteration and SHA-1, far below guidance.",
+     fix: "Upgrade to crypto-js >= 4.2.0 and set iterations >= 600000, or use WebCrypto."}
+  - {id: "CVE-2016-1000352", ecosystem: npm, name: "node-forge", affected: "<1.0.0", severity: medium,
+     cwe: CWE-310, title: "node-forge ECDSA / RSA-PSS verification and prototype pollution issues",
+     description: "Older node-forge has multiple crypto-verification and prototype-pollution advisories.",
+     fix: "Upgrade node-forge to >= 1.3.1."}
+  - {id: "CVE-2018-1000180", ecosystem: maven, name: "org.bouncycastle:bcprov-jdk15on", affected: "<1.60", severity: medium,
+     cwe: CWE-320, title: "BouncyCastle low-order / RSA key-gen and DH issues",
+     description: "BouncyCastle before 1.60 has several key-generation and parameter-validation weaknesses.",
+     fix: "Upgrade to bcprov-jdk18on >= 1.78."}
+  - {id: "CVE-2023-33201", ecosystem: maven, name: "org.bouncycastle:bcprov-jdk18on", affected: "<1.74", severity: medium,
+     cwe: CWE-295, title: "BouncyCastle LDAP CertStore certificate-check bypass",
+     description: "A crafted certificate could bypass revocation checks via the LDAP CertStore.",
+     fix: "Upgrade BouncyCastle to >= 1.74 (prefer >= 1.78 for PQC)."}
+  - {id: "RUSTSEC-2023-0071", ecosystem: cargo, name: rsa, affected: "<0.10.0", severity: medium,
+     cwe: CWE-208, title: "`rsa` crate Marvin timing side channel",
+     description: "The pure-Rust `rsa` crate has a key-recovery timing side channel in PKCS#1 v1.5 decryption.",
+     fix: "Track RUSTSEC-2023-0071; avoid RSA decryption in this crate for now."}
+  - {id: "CVE-2015-2141", ecosystem: pip, name: "m2crypto", affected: "<0.22.5", severity: medium,
+     cwe: CWE-310, title: "M2Crypto Bleichenbacher / RSA signature-forgery issues",
+     description: "Old M2Crypto is vulnerable to RSA signature forgery and is lightly maintained.",
+     fix: "Use `cryptography`."}

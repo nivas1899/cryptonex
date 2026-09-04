@@ -50,6 +50,7 @@ class MisuseRule:
     description: str
     remediation: str
     extensions: tuple[str, ...] = ()  # empty = all text files
+    once_per_file: bool = False
 
     def applies_to(self, ext: str) -> bool:
         return not self.extensions or ext.lower() in self.extensions
@@ -76,6 +77,7 @@ class KB:
     rules_by_ext: dict[str, list[CompiledRule]]
     misuse_rules: list[MisuseRule]
     constants: list[CryptoConstant]
+    advisories: list[dict]
 
     # ---------- algorithm resolution ----------
     def resolve(
@@ -231,7 +233,7 @@ def get_kb() -> KB:
         compiled: list[CompiledRule] = []
         for r in spec["rules"]:
             try:
-                rx = re.compile(r["regex"], re.IGNORECASE)
+                rx = re.compile(r["regex"], re.IGNORECASE | re.MULTILINE)
             except re.error as e:  # pragma: no cover
                 raise ValueError(f"bad regex in rule {r['id']}: {e}") from e
             compiled.append(CompiledRule(
@@ -247,7 +249,7 @@ def get_kb() -> KB:
     misuse_rules: list[MisuseRule] = []
     for r in misuse_spec.get("rules", []):
         try:
-            rx = re.compile(r["regex"], re.IGNORECASE)
+            rx = re.compile(r["regex"], re.IGNORECASE | re.MULTILINE)
         except re.error as e:  # pragma: no cover
             raise ValueError(f"bad misuse regex {r['id']}: {e}") from e
         misuse_rules.append(MisuseRule(
@@ -255,6 +257,7 @@ def get_kb() -> KB:
             category=r["category"], cwe=r.get("cwe"),
             description=r.get("description", ""), remediation=r.get("remediation", ""),
             extensions=tuple(e.lower() for e in r.get("extensions", [])),
+            once_per_file=bool(r.get("once_per_file")),
         ))
 
     const_spec = _load("constants.yaml")
@@ -266,9 +269,11 @@ def get_kb() -> KB:
         for c in const_spec.get("constants", [])
     ]
 
+    advisories = _load("advisories.yaml").get("advisories", [])
+
     return KB(
         version=str(algorithms.get("version", "dev")),
         algorithms=algorithms, aliases=aliases, libraries=libraries,
         pqc=pqc, policy=policy, rules_by_ext=rules_by_ext,
-        misuse_rules=misuse_rules, constants=constants,
+        misuse_rules=misuse_rules, constants=constants, advisories=advisories,
     )

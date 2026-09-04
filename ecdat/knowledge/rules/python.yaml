@@ -59,10 +59,63 @@ rules:
     raw_name: fernet
     confidence: medium
   - id: py.des3
-    regex: 'TripleDES\(|DES3\.'
+    regex: 'TripleDES\(|DES3\.|algorithms\.TripleDES\('
     raw_name: "3des"
     confidence: medium
+  - id: py.des
+    regex: 'algorithms\.(DES|Blowfish|CAST5|IDEA|SEED)\('
+    raw_name: des
+    confidence: medium
   - id: py.rc4
-    regex: 'ARC4\(|Cipher\.ARC4'
+    regex: 'ARC4\(|Cipher\.ARC4|algorithms\.ARC4\('
     raw_name: rc4
     confidence: medium
+  - id: py.chacha
+    regex: 'ChaCha20Poly1305\(|algorithms\.ChaCha20\('
+    raw_name: "chacha20-poly1305"
+    primitive: aead
+    confidence: high
+  - id: py.ed25519
+    regex: 'ed25519\.Ed25519PrivateKey|Ed25519PrivateKey\.(generate|from_)'
+    raw_name: ed25519
+    primitive: signature
+    confidence: high
+  - id: py.x25519
+    regex: 'x25519\.X25519PrivateKey|X25519PrivateKey\.(generate|from_)'
+    raw_name: x25519
+    primitive: key-agreement
+    confidence: high
+  - id: py.dsa
+    regex: 'dsa\.generate_private_key\s*\(|DSA\.generate\s*\('
+    raw_name: dsa
+    primitive: signature
+    confidence: high
+  - id: py.nacl
+    regex: 'nacl\.(secret|public|signing)\.|SigningKey\.generate\s*\(|PrivateKey\.generate\s*\('
+    raw_name: x25519
+    primitive: key-agreement
+    confidence: medium
+  - id: py.jwt_lib
+    regex: 'from\s+jose\s+import|python_jwt|jwcrypto'
+    raw_name: rs256
+    primitive: signature
+    confidence: low
+  - id: py.oqs
+    regex: '\boqs\.(KeyEncapsulation|Signature)\s*\(\s*[''"](?P<algo>[A-Za-z0-9\-]+)[''"]'
+    raw_name: "{algo}"
+    confidence: high
+  - id: py.scrypt
+    regex: 'Scrypt\s*\(|hashlib\.scrypt\s*\('
+    raw_name: scrypt
+    primitive: kdf
+    confidence: high
+  - id: py.hkdf
+    regex: '\bHKDF\s*\(|HKDFExpand\s*\('
+    raw_name: hkdf
+    primitive: kdf
+    confidence: high
+  - id: py.hmac_module
+    regex: 'hmac\.new\s*\([^)]*digestmod\s*=\s*[''"]?(?:hashlib\.)?(?P<h>sha1|sha256|sha512|md5)'
+    raw_name: "hmac-{h}"
+    primitive: mac
+    confidence: high

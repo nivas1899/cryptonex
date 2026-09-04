@@ -42,12 +42,13 @@ rules:
       hybrid X25519+ML-KEM-768 so the channel is safe if either component is later weakened.
 
   - id: rec.sym.aes128
-    match: {family: [AES], key_size: 128}
+    match: {family: [AES, Camellia, ARIA, SM4, SEED]}
     target: AES-256-GCM
     latency_class: comparable
     default_effort: trivial
     rationale: >
-      Grover halves AES-128's effective strength. Re-key to AES-256 and prefer an AEAD mode (GCM).
+      This symmetric cipher is weakened (128-bit key under Grover, or ECB mode).
+      Re-key to a 256-bit key and use an AEAD mode (AES-256-GCM or ChaCha20-Poly1305).
 
   - id: rec.cipher.legacy
     match: {family: [3DES, DES, RC4, Blowfish]}

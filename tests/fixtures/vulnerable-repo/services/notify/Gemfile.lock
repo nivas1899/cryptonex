@@ -1,0 +1,13 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    jwt (2.7.1)
+    bcrypt (3.1.19)
+    openssl (3.2.0)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  bcrypt
+  jwt

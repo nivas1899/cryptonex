@@ -1,0 +1,31 @@
+language: swift
+extensions: [".swift"]
+rules:
+  - id: sw.cryptokit.aesgcm
+    regex: '\bAES\.GCM\.(seal|open)\b|ChaChaPoly\.(seal|open)'
+    raw_name: aesgcm
+    primitive: aead
+    confidence: high
+  - id: sw.cryptokit.sha
+    regex: '\bSHA(?P<n>256|384|512)\.hash\b|Insecure\.(?P<algo>MD5|SHA1)\.hash'
+    raw_name: "sha{n}"
+    confidence: high
+  - id: sw.cryptokit.curve
+    regex: '\b(Curve25519|P256|P384|P521)\.(Signing|KeyAgreement)\b'
+    raw_name: ecdsa
+    primitive: signature
+    confidence: high
+  - id: sw.cryptokit.hmac
+    regex: '\bHMAC<SHA(?P<h>256|384|512)>'
+    raw_name: "hmac-sha{h}"
+    primitive: mac
+    confidence: high
+  - id: sw.commoncrypto
+    regex: 'CCCrypt\s*\(|kCCAlgorithm(AES|DES|3DES|RC4)|CC_(MD5|SHA1|SHA256)\b'
+    raw_name: aes
+    confidence: medium
+  - id: sw.seckey
+    regex: 'SecKeyCreateRandomKey|kSecAttrKeyTypeRSA|kSecAttrKeyTypeEC'
+    raw_name: rsa
+    primitive: pke
+    confidence: medium

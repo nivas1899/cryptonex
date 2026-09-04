@@ -20,3 +20,14 @@ constants:
   - {id: const.curve25519.p, hex: "7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffed", family: ECC, name: "Curve25519 field prime", primitive: key-agreement}
   - {id: const.chacha.sigma, hex: "657870616e642033322d62797465206b",                     family: ChaCha20, name: "ChaCha20 constant (\"expand 32-byte k\")"}
   - {id: const.crc32,        hex: "00000000772073961ee20fb6c33b25e5",                     family: UNKNOWN,  name: "CRC-32 table (not cryptographic — often mistaken for one)"}
+  - {id: const.sha3.rc,      hex: "0000000000000001000000000000808a800000000000808b8000000080008000", family: SHA-3, name: "Keccak / SHA-3 round constants"}
+  - {id: const.twofish.q0,   hex: "a967b3e8040fd1a3c05e6b6d51db354c",                     family: Twofish,  name: "Twofish q0 permutation"}
+  - {id: const.serpent.phi,  hex: "9e3779b99e3779b99e3779b99e3779b9",                     family: Serpent,  name: "Serpent golden-ratio key-schedule constant"}
+  - {id: const.sm4.sbox,     hex: "d690e9fecce13db716b614c228fb2c05",                     family: SM4,      name: "SM4 S-box", primitive: block-cipher}
+  - {id: const.camellia.sigma, hex: "a09e667f3bcc908b",                                    family: Camellia, name: "Camellia sigma key constant"}
+  - {id: const.poly1305.clamp, hex: "0ffffffc0ffffffc0ffffffc0fffffff",                   family: Poly1305, name: "Poly1305 r clamp mask"}
+  - {id: const.bcrypt.magic, hex: "4f72706865616e426568656f6c6465725363727944", family: bcrypt,  name: "bcrypt magic string (\"OrpheanBeholderScryDoubt\")"}
+  - {id: const.argon2.blake2b, hex: "6a09e667f3bcc908bb67ae8584caa73b3c6ef372fe94f82ba54ff53a5f1d36f1", family: Argon2, name: "BLAKE2b IV (Argon2 core)"}
+  - {id: const.gost.sbox,    hex: "4a92d1808206b5f4a9e7d1c3ce7bf2c8",                       family: GOST,     name: "GOST 28147-89 S-box"}
+  - {id: const.rc4.identity, hex: "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f", family: RC4, name: "RC4 KSA identity permutation"}
+  - {id: const.chacha.iv,    hex: "617078653320646e79622d326b206574",                     family: ChaCha20, name: "ChaCha20 \"expand 32-byte k\" (byte order variant)"}

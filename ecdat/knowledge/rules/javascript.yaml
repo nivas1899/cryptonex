@@ -38,3 +38,42 @@ rules:
     raw_name: bcrypt
     primitive: kdf
     confidence: high
+  - id: js.scrypt
+    regex: "crypto\\.scrypt(Sync)?\\(|scryptSync\\("
+    raw_name: scrypt
+    primitive: kdf
+    confidence: high
+  - id: js.argon2
+    regex: "argon2\\.(hash|verify)\\(|from\\s+['\"]argon2['\"]"
+    raw_name: argon2id
+    primitive: kdf
+    confidence: high
+  - id: js.hkdf
+    regex: "crypto\\.hkdf(Sync)?\\("
+    raw_name: hkdf
+    primitive: kdf
+    confidence: high
+  - id: js.diffiehellman
+    regex: "crypto\\.(createDiffieHellman|createECDH)\\(\\s*['\"]?(?P<g>[A-Za-z0-9-]+)?"
+    raw_name: dh
+    primitive: key-agreement
+    confidence: high
+  - id: js.webcrypto
+    regex: "subtle\\.(encrypt|sign|deriveKey|generateKey)\\([^)]*name\\s*:\\s*['\"](?P<algo>AES-GCM|AES-CBC|RSA-OAEP|RSA-PSS|ECDSA|ECDH|HMAC|PBKDF2)['\"]"
+    raw_name: "{algo}"
+    confidence: high
+  - id: js.tweetnacl
+    regex: "nacl\\.(box|sign|secretbox|scalarMult)\\b"
+    raw_name: x25519
+    primitive: key-agreement
+    confidence: medium
+  - id: js.noble.pqc
+    regex: "@noble/post-quantum|ml_kem768|ml_dsa65|mlkem|mldsa"
+    raw_name: "ml-kem"
+    primitive: kem
+    confidence: medium
+  - id: js.getrandomvalues
+    regex: "crypto\\.getRandomValues\\(|crypto\\.randomBytes\\("
+    raw_name: drbg
+    primitive: drbg
+    confidence: high

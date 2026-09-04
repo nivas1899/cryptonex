@@ -60,3 +60,54 @@ libraries:
 
   - {ecosystem: pip, name: "django", provides: [{raw: pbkdf2}]}
   - {ecosystem: pip, name: "flask-bcrypt", provides: [{raw: bcrypt}]}
+  - {ecosystem: pip, name: "passlib", provides: [{raw: bcrypt}, {raw: argon2id}, {raw: pbkdf2}]}
+  - {ecosystem: pip, name: "ecdsa", flag: true, reason: "pure-Python `ecdsa` has had timing side-channel advisories (CVE-2024-23342).", provides: [{raw: ecdsa}]}
+  - {ecosystem: pip, name: "rsa", flag: true, reason: "pure-Python `rsa` — Bleichenbacher-style issues; RSA only.", provides: [{raw: rsa}]}
+  - {ecosystem: pip, name: "cryptg", provides: [{raw: "aes-256-cbc"}]}
+
+  # --- Rust (Cargo) ---
+  - {ecosystem: cargo, name: "openssl", provides: [{raw: rsa}, {raw: ecdsa}, {raw: "aes-256-gcm"}]}
+  - {ecosystem: cargo, name: "rsa", flag: true, reason: "The `rsa` crate has a Marvin timing side channel (RUSTSEC-2023-0071).", provides: [{raw: rsa}]}
+  - {ecosystem: cargo, name: "ring", provides: [{raw: ed25519}, {raw: ecdsa}, {raw: "aes-256-gcm"}]}
+  - {ecosystem: cargo, name: "aes-gcm", provides: [{raw: "aes-256-gcm"}]}
+  - {ecosystem: cargo, name: "chacha20poly1305", provides: [{raw: "chacha20-poly1305"}]}
+  - {ecosystem: cargo, name: "ed25519-dalek", provides: [{raw: ed25519}]}
+  - {ecosystem: cargo, name: "x25519-dalek", provides: [{raw: x25519}]}
+  - {ecosystem: cargo, name: "p256", provides: [{raw: ecdsa}]}
+  - {ecosystem: cargo, name: "sha2", provides: [{raw: sha256}]}
+  - {ecosystem: cargo, name: "md-5", flag: true, reason: "MD5 is broken.", provides: [{raw: md5}]}
+  - {ecosystem: cargo, name: "sha1", flag: true, reason: "SHA-1 is broken.", provides: [{raw: sha1}]}
+  - {ecosystem: cargo, name: "pqcrypto", provides: [{raw: "ml-kem"}, {raw: "ml-dsa"}]}
+  - {ecosystem: cargo, name: "argon2", provides: [{raw: argon2id}]}
+  - {ecosystem: cargo, name: "jsonwebtoken", provides: [{raw: hs256}, {raw: rs256}]}
+  - {ecosystem: cargo, name: "rustls", provides: [{raw: x25519}, {raw: "aes-256-gcm"}]}
+
+  # --- .NET (NuGet) ---
+  - {ecosystem: nuget, name: "BouncyCastle", version_lt: "2.0.0", flag: true, reason: "Legacy Portable.BouncyCastle predates PQC.", provides: [{raw: rsa}, {raw: ecdsa}, {raw: dh}]}
+  - {ecosystem: nuget, name: "BouncyCastle.Cryptography", provides: [{raw: rsa}, {raw: ecdsa}, {raw: "ml-kem"}]}
+  - {ecosystem: nuget, name: "System.IdentityModel.Tokens.Jwt", provides: [{raw: rs256}, {raw: hs256}]}
+  - {ecosystem: nuget, name: "jose-jwt", provides: [{raw: rs256}, {raw: es256}]}
+  - {ecosystem: nuget, name: "NSec.Cryptography", provides: [{raw: ed25519}, {raw: x25519}]}
+  - {ecosystem: nuget, name: "Sodium.Core", provides: [{raw: ed25519}, {raw: x25519}]}
+
+  # --- Ruby (gem) ---
+  - {ecosystem: gem, name: "jwt", provides: [{raw: hs256}, {raw: rs256}]}
+  - {ecosystem: gem, name: "bcrypt", provides: [{raw: bcrypt}]}
+  - {ecosystem: gem, name: "rbnacl", provides: [{raw: ed25519}, {raw: x25519}]}
+  - {ecosystem: gem, name: "openssl", provides: [{raw: rsa}, {raw: ecdsa}, {raw: "aes-256-gcm"}]}
+  - {ecosystem: gem, name: "argon2", provides: [{raw: argon2id}]}
+  - {ecosystem: gem, name: "digest-crc", provides: []}
+
+  # --- PHP (composer) ---
+  - {ecosystem: composer, name: "firebase/php-jwt", provides: [{raw: hs256}, {raw: rs256}]}
+  - {ecosystem: composer, name: "lcobucci/jwt", provides: [{raw: hs256}, {raw: es256}]}
+  - {ecosystem: composer, name: "paragonie/halite", provides: [{raw: x25519}, {raw: "chacha20-poly1305"}]}
+  - {ecosystem: composer, name: "phpseclib/phpseclib", provides: [{raw: rsa}, {raw: ecdsa}, {raw: "aes-256-cbc"}]}
+  - {ecosystem: composer, name: "defuse/php-encryption", provides: [{raw: "aes-256-ctr"}]}
+  - {ecosystem: composer, name: "web-token/jwt-framework", provides: [{raw: rs256}, {raw: es256}]}
+
+  # --- Swift (CocoaPods) ---
+  - {ecosystem: cocoapods, name: "CryptoSwift", flag: true, reason: "CryptoSwift is not constant-time; prefer Apple CryptoKit.", provides: [{raw: "aes-256-cbc"}, {raw: sha256}]}
+  - {ecosystem: cocoapods, name: "Sodium", provides: [{raw: ed25519}, {raw: x25519}]}
+  - {ecosystem: cocoapods, name: "OpenSSL-Universal", provides: [{raw: rsa}, {raw: "aes-256-gcm"}]}
+  - {ecosystem: cocoapods, name: "JWTDecode", provides: [{raw: rs256}]}

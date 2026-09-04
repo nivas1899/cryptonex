@@ -11,10 +11,11 @@ from ecdat.scanners.base import Scanner, ScanContext, read_text, walk_files
 
 _TEXT_EXT = {
     ".py", ".java", ".kt", ".scala", ".js", ".mjs", ".cjs", ".ts", ".jsx", ".tsx",
-    ".go", ".c", ".cc", ".cpp", ".cxx", ".h", ".hpp", ".cs", ".rb", ".php", ".rs",
-    ".swift", ".sh", ".bash", ".conf", ".cnf", ".ini", ".cfg", ".properties",
-    ".yaml", ".yml", ".toml", ".env",
+    ".go", ".c", ".cc", ".cpp", ".cxx", ".h", ".hpp", ".cs", ".rb", ".rake", ".php", ".rs",
+    ".swift", ".m", ".mm", ".sh", ".bash", ".conf", ".cnf", ".cfg", ".ini",
+    ".properties", ".yaml", ".yml", ".toml", ".env", ".tf", ".hcl",
 }
+_TEXT_NAMES = {"sshd_config", "ssh_config"}
 _QUANTUM_CATEGORIES = {"weak-parameters", "hand-rolled-crypto"}
 
 
@@ -25,7 +26,7 @@ class MisuseScanner(Scanner):
         kb = get_kb()
         rules = kb.misuse_rules
         for path in walk_files(ctx):
-            if path.suffix.lower() not in _TEXT_EXT:
+            if path.suffix.lower() not in _TEXT_EXT and path.name.lower() not in _TEXT_NAMES:
                 continue
             text = read_text(path)
             if text is None:
@@ -56,6 +57,8 @@ class MisuseScanner(Scanner):
                         remediation=rule.remediation,
                         quantum_relevant=rule.category in _QUANTUM_CATEGORIES,
                     )
+                    if rule.once_per_file:
+                        break
 
 
 _STRIP = re.compile(r"(?:0x|\\x|[\s,\"'_;:{}()\[\]<>|&+])")

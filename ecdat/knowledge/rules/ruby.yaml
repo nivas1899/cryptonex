@@ -1,0 +1,46 @@
+language: ruby
+extensions: [".rb", ".rake"]
+rules:
+  - id: rb.openssl.cipher
+    regex: 'OpenSSL::Cipher(?:\.new|::Cipher\.new)?\s*(?:\.new)?\s*\(\s*[''"](?P<algo>[A-Za-z0-9-]+)[''"]|OpenSSL::Cipher::(?P<algo2>AES|DES|RC4)'
+    raw_name: "{algo}"
+    confidence: high
+  - id: rb.digest
+    regex: 'OpenSSL::Digest(?:::(?P<algo>SHA1|SHA256|SHA384|SHA512|MD5))?|Digest::(?P<algo2>MD5|SHA1|SHA256|SHA2)'
+    raw_name: "{algo}"
+    confidence: high
+  - id: rb.hmac
+    regex: 'OpenSSL::HMAC\.(hexdigest|digest)\s*\(\s*OpenSSL::Digest[.:]+(?P<h>SHA1|SHA256|SHA512)'
+    raw_name: "hmac-{h}"
+    primitive: mac
+    confidence: high
+  - id: rb.rsa
+    regex: 'OpenSSL::PKey::RSA\.(new|generate)'
+    raw_name: rsa
+    primitive: pke
+    confidence: high
+  - id: rb.ec
+    regex: 'OpenSSL::PKey::EC\.(new|generate)'
+    raw_name: ecdsa
+    primitive: signature
+    confidence: high
+  - id: rb.pbkdf2
+    regex: 'OpenSSL::PKCS5\.pbkdf2_hmac|Rails\.application\.key_generator'
+    raw_name: "pbkdf2-hmac-sha256"
+    primitive: kdf
+    confidence: medium
+  - id: rb.bcrypt
+    regex: '\bBCrypt::(Password|Engine)\b'
+    raw_name: bcrypt
+    primitive: kdf
+    confidence: high
+  - id: rb.securerandom
+    regex: '\bSecureRandom\.(hex|bytes|uuid|random_bytes)\b'
+    raw_name: drbg
+    primitive: drbg
+    confidence: high
+  - id: rb.rand_weak
+    regex: '\bRandom\.rand\b|\brand\s*\(\s*\d'
+    raw_name: drbg
+    primitive: drbg
+    confidence: low

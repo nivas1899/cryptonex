@@ -1,8 +1,9 @@
 language: config
 extensions: [".conf", ".cnf", ".ini", ".cfg", ".properties", ".yaml", ".yml", ".toml"]
 rules:
+  # --- nginx ---
   - id: cfg.ecdh_curve
-    regex: 'ssl_ecdh_curve\s+(?P<curve>prime256v1|secp256r1|secp384r1|X25519)'
+    regex: 'ssl_ecdh_curve\s+(?P<curve>prime256v1|secp256r1|secp384r1|secp521r1|X25519)'
     raw_name: ecdh
     primitive: key-agreement
     external: true
@@ -13,16 +14,50 @@ rules:
     primitive: key-agreement
     external: true
     confidence: medium
+  - id: cfg.nginx_ciphers
+    regex: 'ssl_ciphers\s+[^;\n]*(?P<c>ECDHE|DHE|RSA|AES128|3DES|RC4)'
+    raw_name: ecdh
+    primitive: key-agreement
+    external: true
+    confidence: low
+  # --- Apache mod_ssl ---
+  - id: cfg.apache_protocol
+    regex: 'SSLProtocol\s+[^\n]*(?P<v>SSLv3|TLSv1(\.[01])?)'
+    raw_name: ecdh
+    primitive: key-agreement
+    external: true
+    confidence: low
+  - id: cfg.apache_ciphers
+    regex: 'SSLCipherSuite\s+[^\n]*(?P<c>ECDHE|DHE|AES256-GCM|3DES|RC4|EXP)'
+    raw_name: ecdh
+    primitive: key-agreement
+    external: true
+    confidence: low
+  # --- HAProxy ---
+  - id: cfg.haproxy_ssl
+    regex: 'ssl-default-bind-ciphers\s+[^\n]*(?P<c>ECDHE|DHE|AES)|bind\s+.*ssl\s+.*crt'
+    raw_name: ecdh
+    primitive: key-agreement
+    external: true
+    confidence: low
+  # --- Postfix / Dovecot ---
+  - id: cfg.postfix_tls
+    regex: 'smtpd?_tls_(mandatory_)?protocols\s*=\s*[^\n]*(?P<v>SSLv[23]|TLSv1(\.[01])?)'
+    raw_name: ecdh
+    primitive: key-agreement
+    external: true
+    confidence: low
+  - id: cfg.dh_param_file
+    regex: '(dhparam|ssl_dh_param|tls_dh1024_param_file|smtpd_tls_dh1024_param_file)\s*[:= ]'
+    raw_name: dh
+    primitive: key-agreement
+    confidence: medium
+  # --- IPsec / strongSwan / IKE ---
   - id: cfg.ike_modp
     regex: '\bmodp(?P<bits>\d{3,4})\b'
     raw_name: dh
     primitive: key-agreement
     external: true
-    confidence: high
-  - id: cfg.openssl_bits
-    regex: 'default_bits\s*=\s*(?P<bits>\d{3,4})'
-    raw_name: rsa
-    primitive: signature
     confidence: high
   - id: cfg.ike_suite
     regex: 'ike\s*=\s*aes\d+-sha\d+-modp(?P<bits>\d+)'
@@ -30,3 +65,43 @@ rules:
     primitive: key-agreement
     external: true
     confidence: high
+  - id: cfg.ike_curve
+    regex: 'ike\s*=\s*[^\n]*(?P<curve>ecp256|ecp384|curve25519|x25519)'
+    raw_name: ecdh
+    primitive: key-agreement
+    external: true
+    confidence: medium
+  # --- OpenSSL / X.509 config ---
+  - id: cfg.openssl_bits
+    regex: 'default_bits\s*=\s*(?P<bits>\d{3,5})'
+    raw_name: rsa
+    primitive: signature
+    confidence: high
+  - id: cfg.openssl_md
+    regex: 'default_md\s*=\s*(?P<h>md5|sha1|sha256|sha384|sha512)'
+    raw_name: "{h}"
+    confidence: medium
+  # --- SSH ---
+  - id: cfg.sshd_kex
+    regex: '^KexAlgorithms\s+[^\n]*(?P<k>curve25519|ecdh-sha2|diffie-hellman-group1|diffie-hellman-group14|sntrup761x25519|mlkem768x25519)'
+    raw_name: ecdh
+    primitive: key-agreement
+    external: true
+    confidence: medium
+  - id: cfg.sshd_ciphers_weak
+    regex: '^Ciphers\s+[^\n]*(?P<c>3des-cbc|arcfour|blowfish-cbc|cast128-cbc|aes\d+-cbc)'
+    raw_name: "3des"
+    external: true
+    confidence: medium
+  - id: cfg.sshd_hostkey
+    regex: 'HostKey\s+[^\n]*(ssh_host_(?P<t>rsa|ecdsa|ed25519)_key)'
+    raw_name: "{t}"
+    primitive: signature
+    external: true
+    confidence: medium
+  # --- generic key sizes ---
+  - id: cfg.rsa_bits_generic
+    regex: '(rsa_key_size|key_bits|rsa_bits|keySize)\s*[:=]\s*(?P<bits>\d{3,5})'
+    raw_name: rsa
+    primitive: signature
+    confidence: medium

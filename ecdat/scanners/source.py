@@ -40,10 +40,26 @@ class SourceScanner(Scanner):
                     params = AlgorithmParameters()
                     if "bits" in gd and gd["bits"].isdigit():
                         params.key_size = int(gd["bits"])
+                    if "keysize" in gd and gd["keysize"].isdigit():
+                        params.key_size = int(gd["keysize"])
                     if "curve" in gd:
                         params.curve = gd["curve"]
                     if "hash" in gd:
                         params.hash = _canon_hash(gd["hash"])
+                    if "mode" in gd:
+                        params.mode = gd["mode"].upper()
+                    if "padding" in gd:
+                        params.padding = gd["padding"]
+                    # generic params_from mapping declared on the rule
+                    for field_name, group in rule.params_from.items():
+                        if group in gd and gd[group]:
+                            v = gd[group]
+                            if field_name == "key_size" and str(v).isdigit():
+                                params.key_size = int(v)
+                            elif field_name == "hash":
+                                params.hash = _canon_hash(v)
+                            elif hasattr(params, field_name):
+                                setattr(params, field_name, str(v).upper() if field_name == "mode" else v)
                     snippet = (lines[lineno - 1].strip()[:200] if 0 < lineno <= len(lines) else raw)
                     prim = None
                     if rule.primitive:

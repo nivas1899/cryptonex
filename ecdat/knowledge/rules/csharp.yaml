@@ -1,0 +1,62 @@
+language: csharp
+extensions: [".cs"]
+rules:
+  - id: cs.aes.create
+    regex: '\b(Aes|AesManaged|AesCng|RijndaelManaged)\.Create\s*\(|new\s+(AesManaged|RijndaelManaged)\s*\('
+    raw_name: aes
+    confidence: high
+  - id: cs.aes.mode
+    regex: 'CipherMode\.(?P<mode>ECB|CBC|CFB|OFB|CTS)'
+    raw_name: aes
+    confidence: medium
+    params_from: {mode: mode}
+  - id: cs.des
+    regex: '\b(DES|DESCryptoServiceProvider|TripleDES|TripleDESCryptoServiceProvider)\.Create\s*\(|new\s+TripleDESCryptoServiceProvider'
+    raw_name: "3des"
+    confidence: high
+  - id: cs.rc2
+    regex: '\bRC2(CryptoServiceProvider)?\b'
+    raw_name: rc2
+    confidence: medium
+  - id: cs.rsa
+    regex: '\b(RSA|RSACryptoServiceProvider|RSACng)\.Create\s*\(|new\s+RSACryptoServiceProvider\s*\('
+    raw_name: rsa
+    primitive: pke
+    confidence: high
+  - id: cs.ecdsa
+    regex: '\bECDsa(Cng)?\.Create\s*\(|ECDsaCng'
+    raw_name: ecdsa
+    primitive: signature
+    confidence: high
+  - id: cs.ecdh
+    regex: '\bECDiffieHellman(Cng)?\b'
+    raw_name: ecdh
+    primitive: key-agreement
+    confidence: high
+  - id: cs.md5
+    regex: '\b(MD5|MD5CryptoServiceProvider)\.Create\s*\(|new\s+MD5CryptoServiceProvider'
+    raw_name: md5
+    confidence: high
+  - id: cs.sha1
+    regex: '\b(SHA1|SHA1CryptoServiceProvider|SHA1Managed)\.Create\s*\(|new\s+SHA1Managed'
+    raw_name: sha1
+    confidence: high
+  - id: cs.sha256
+    regex: '\b(SHA256|SHA256Managed)\.Create\s*\(|SHA512\.Create\s*\('
+    raw_name: sha256
+    confidence: high
+  - id: cs.hmac
+    regex: '\bnew\s+HMAC(?P<h>SHA1|SHA256|SHA512|MD5)\s*\('
+    raw_name: "hmac-{h}"
+    primitive: mac
+    confidence: high
+  - id: cs.pbkdf2
+    regex: '\bRfc2898DeriveBytes\s*\(|new\s+Rfc2898DeriveBytes'
+    raw_name: "pbkdf2-hmac-sha1"
+    primitive: kdf
+    confidence: medium
+  - id: cs.rng
+    regex: 'RandomNumberGenerator\.(Create|GetBytes)|RNGCryptoServiceProvider'
+    raw_name: drbg
+    primitive: drbg
+    confidence: high

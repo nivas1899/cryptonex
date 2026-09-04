@@ -41,3 +41,33 @@ rules:
     regex: 'DESede|TripleDES'
     raw_name: "3des"
     confidence: medium
+  - id: java.securerandom
+    regex: 'SecureRandom\.getInstanceStrong\s*\(|new\s+SecureRandom\s*\('
+    raw_name: drbg
+    primitive: drbg
+    confidence: high
+  - id: java.keyagreement2
+    regex: 'KeyAgreement\.getInstance\(\s*"(?P<algo>ECDH|DH|X25519|XDH)"'
+    raw_name: "{algo}"
+    primitive: key-agreement
+    confidence: high
+  - id: java.tls_context
+    regex: 'SSLContext\.getInstance\(\s*"(?P<v>TLS|TLSv1|TLSv1\.1|TLSv1\.2|TLSv1\.3|SSL)"'
+    raw_name: ecdh
+    primitive: key-agreement
+    external: true
+    confidence: low
+  - id: java.bc_pqc
+    regex: '(MLKEM|MLDSA|Kyber|Dilithium|SPHINCSPlus|Falcon)(KeyPairGenerator|Signer)?|BCPQCProvider'
+    raw_name: "ml-kem"
+    confidence: medium
+  - id: java.jwt
+    regex: '(Algorithm|SignatureAlgorithm)\.(?P<algo>HS256|HS384|HS512|RS256|RS384|RS512|ES256|ES384|PS256)|\.sign(With)?\([^)]*"(?P<algo2>HS256|RS256|ES256)"'
+    raw_name: "{algo}"
+    primitive: signature
+    confidence: high
+  - id: java.pbkdf2_direct
+    regex: 'PBEKeySpec\s*\(|"PBKDF2WithHmac(?P<h>SHA1|SHA256|SHA512)"'
+    raw_name: "pbkdf2-hmac-{h}"
+    primitive: kdf
+    confidence: high

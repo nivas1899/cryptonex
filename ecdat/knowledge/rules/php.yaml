@@ -1,0 +1,49 @@
+language: php
+extensions: [".php"]
+rules:
+  - id: php.openssl.encrypt
+    regex: 'openssl_(encrypt|decrypt)\s*\(\s*[^,]+,\s*[''"](?P<algo>[A-Za-z0-9-]+)[''"]'
+    raw_name: "{algo}"
+    confidence: high
+  - id: php.openssl.sign
+    regex: 'openssl_(sign|verify)\s*\('
+    raw_name: rsa
+    primitive: signature
+    confidence: medium
+  - id: php.openssl.pkey
+    regex: 'openssl_pkey_new\s*\('
+    raw_name: rsa
+    primitive: pke
+    confidence: medium
+  - id: php.hash
+    regex: '\bhash\s*\(\s*[''"](?P<algo>md5|sha1|sha256|sha384|sha512|sha3-256|crc32)[''"]'
+    raw_name: "{algo}"
+    confidence: high
+  - id: php.hash_hmac
+    regex: 'hash_hmac\s*\(\s*[''"](?P<algo>md5|sha1|sha256|sha512)[''"]'
+    raw_name: "hmac-{algo}"
+    primitive: mac
+    confidence: high
+  - id: php.md5_sha1
+    regex: '\b(md5|sha1|crc32|crypt)\s*\('
+    raw_name: md5
+    confidence: low
+  - id: php.mcrypt
+    regex: 'mcrypt_(encrypt|decrypt|module_open)\s*\(|MCRYPT_(DES|TRIPLEDES|RIJNDAEL|BLOWFISH)'
+    raw_name: "3des"
+    confidence: medium
+  - id: php.password_hash
+    regex: 'password_hash\s*\([^,]+,\s*(PASSWORD_BCRYPT|PASSWORD_ARGON2ID|PASSWORD_DEFAULT)'
+    raw_name: bcrypt
+    primitive: kdf
+    confidence: high
+  - id: php.sodium
+    regex: '\bsodium_crypto_(box|sign|secretbox|aead_[a-z0-9]+)\b'
+    raw_name: x25519
+    primitive: key-agreement
+    confidence: medium
+  - id: php.rand_weak
+    regex: '\b(rand|mt_rand|uniqid)\s*\('
+    raw_name: drbg
+    primitive: drbg
+    confidence: low

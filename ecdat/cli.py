@@ -154,9 +154,11 @@ def kb_info():
     console.print(f"aliases:             {len(kb.aliases.get('aliases', {}))}")
     console.print(f"libraries:           {len(kb.libraries.get('libraries', []))}")
     console.print(f"pqc recommendation:  {len(kb.pqc_rules())} rules")
-    console.print(f"crypto detection:    {uniq_rules} source rules")
+    langs = sorted({r.language for rs in kb.rules_by_ext.values() for r in rs})
+    console.print(f"crypto detection:    {uniq_rules} rules across {len(langs)} languages")
     console.print(f"threat / misuse:     {len(kb.misuse_rules)} rules")
     console.print(f"crypto constants:    {len(kb.constants)} fingerprints")
+    console.print(f"library advisories:  {len(kb.advisories)} (CVE / RUSTSEC / GHSA)")
     console.print(f"scanners:            {', '.join(available_scanners())}")
 
 
