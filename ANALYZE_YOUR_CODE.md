@@ -36,7 +36,7 @@ docker run --rm -p 8713:8713 -v "/path/to/your/repo":/code:ro ecdat:local serve
 | A local folder | scan the folder directly |
 | A Git repository | `git clone <url>` first, then scan the folder |
 | A monorepo | scan the repo root, or a sub-path (`ecdat scan services/payments`) |
-| A built container image | `docker save img:tag -o img.tar` then extract and scan its rootfs (direct image scanning is M1) |
+| A built container image | `docker save img:tag -o img.tar` then `ecdat scan img.tar` — layers are unpacked and scanned in place |
 
 ECDAT recognises: `.py .java .kt .js .ts .go .c .cpp .h`, config files
 (`.conf .cnf .yaml .yml .ini .properties .toml`), shell scripts, dependency manifests
