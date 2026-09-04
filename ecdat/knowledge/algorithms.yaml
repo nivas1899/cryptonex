@@ -23,11 +23,27 @@ families:
   bcrypt:    {primitive: kdf,           quantum_status: safe,       reason: "Password hashing; not a quantum target."}
   scrypt:    {primitive: kdf,           quantum_status: safe,       reason: "Password hashing; not a quantum target."}
   Argon2:    {primitive: kdf,           quantum_status: safe,       reason: "Current best-practice password hashing."}
-  ML-KEM:    {primitive: kem,           quantum_status: safe,       reason: "NIST PQC standard, FIPS 203."}
-  ML-DSA:    {primitive: signature,     quantum_status: safe,       reason: "NIST PQC standard, FIPS 204."}
-  SLH-DSA:   {primitive: signature,     quantum_status: safe,       reason: "NIST PQC standard, FIPS 205 (hash-based)."}
-  FN-DSA:    {primitive: signature,     quantum_status: safe,       reason: "NIST PQC signature (Falcon)."}
-  HQC:       {primitive: kem,           quantum_status: safe,       reason: "NIST PQC backup KEM."}
+  ML-KEM:    {primitive: kem,           quantum_status: safe,       reason: "NIST PQC standard, FIPS 203 (from CRYSTALS-Kyber)."}
+  ML-DSA:    {primitive: signature,     quantum_status: safe,       reason: "NIST PQC standard, FIPS 204 (from CRYSTALS-Dilithium)."}
+  SLH-DSA:   {primitive: signature,     quantum_status: safe,       reason: "NIST PQC standard, FIPS 205 (hash-based, from SPHINCS+)."}
+  FN-DSA:    {primitive: signature,     quantum_status: safe,       reason: "NIST PQC signature (Falcon); FIPS 206 draft."}
+  HQC:       {primitive: kem,           quantum_status: safe,       reason: "NIST PQC backup KEM (code-based), selected 2025."}
+  XMSS:      {primitive: signature,     quantum_status: safe,       reason: "Stateful hash-based signature (RFC 8391); quantum-safe but requires state management."}
+  LMS:       {primitive: signature,     quantum_status: safe,       reason: "Stateful hash-based signature (RFC 8554); NIST SP 800-208."}
+  Camellia:  {primitive: block-cipher,  quantum_status: safe,       reason: "128-bit block; Camellia-256 retains strength against Grover."}
+  ARIA:      {primitive: block-cipher,  quantum_status: safe,       reason: "Korean standard; 256-bit key retains strength against Grover."}
+  SEED:      {primitive: block-cipher,  quantum_status: weakened,   reason: "128-bit key only; effective ~64-bit under Grover. Legacy Korean standard."}
+  SM2:       {primitive: signature,     quantum_status: vulnerable, reason: "Chinese elliptic-curve scheme; Shor solves the ECDLP."}
+  SM3:       {primitive: hash,          quantum_status: safe,       reason: "256-bit Chinese hash standard; comparable to SHA-256."}
+  SM4:       {primitive: block-cipher,  quantum_status: weakened,   reason: "128-bit key only; effective ~64-bit under Grover."}
+  GOST:      {primitive: block-cipher,  quantum_status: weakened,   reason: "GOST 28147-89 / Magma; 64-bit block, aging."}
+  CAST:      {primitive: block-cipher,  quantum_status: broken,     reason: "CAST-128 has a 64-bit block; deprecated."}
+  IDEA:      {primitive: block-cipher,  quantum_status: broken,     reason: "64-bit block, 128-bit key; deprecated."}
+  Poly1305:  {primitive: mac,           quantum_status: safe,       reason: "One-time authenticator; security tied to the key, not a quantum target."}
+  HKDF:      {primitive: kdf,           quantum_status: safe,       reason: "HMAC-based KDF; check the underlying hash."}
+  Ed448:     {primitive: signature,     quantum_status: vulnerable, reason: "Edwards-curve signature; Shor solves the ECDLP."}
+  X448:      {primitive: key-agreement, quantum_status: vulnerable, reason: "Edwards-curve DH; Shor solves the ECDLP."}
+  Kerberos:  {primitive: other,         quantum_status: weakened,   reason: "Protocol security depends on the negotiated etype; RC4/DES etypes are broken, AES etypes acceptable."}
   UNKNOWN:   {primitive: other,         quantum_status: unknown,    reason: "Algorithm not recognised by the knowledge base."}
 
 overrides:
@@ -52,3 +68,6 @@ overrides:
   - when: {family: ECC, curve: Ed25519}
     quantum_status: vulnerable
     reason: "Ed25519 is an elliptic-curve signature scheme; the discrete log is solved by Shor's algorithm."
+  - when: {family: SEED}
+    quantum_status: weakened
+    reason: "SEED has a 128-bit key only; effective ~64-bit under Grover."

@@ -28,7 +28,7 @@ class DependencyScanner(Scanner):
             text = read_text(path)
             if text is None:
                 continue
-            ctx.files_parsed += 1
+            ctx.mark(path)
             rel = ctx.rel(path)
             for name, version, lineno in _parse(eco, path, text):
                 entry = kb.library_lookup(eco, name, version)

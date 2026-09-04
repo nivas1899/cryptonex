@@ -40,6 +40,32 @@ class CompiledRule:
 
 
 @dataclass
+class MisuseRule:
+    id: str
+    rx: re.Pattern
+    title: str
+    severity: str
+    category: str
+    cwe: str | None
+    description: str
+    remediation: str
+    extensions: tuple[str, ...] = ()  # empty = all text files
+
+    def applies_to(self, ext: str) -> bool:
+        return not self.extensions or ext.lower() in self.extensions
+
+
+@dataclass
+class CryptoConstant:
+    id: str
+    hex: str
+    family: str
+    name: str
+    primitive: str | None = None
+    note: str | None = None
+
+
+@dataclass
 class KB:
     version: str
     algorithms: dict[str, Any]
@@ -48,6 +74,8 @@ class KB:
     pqc: dict[str, Any]
     policy: dict[str, Any]
     rules_by_ext: dict[str, list[CompiledRule]]
+    misuse_rules: list[MisuseRule]
+    constants: list[CryptoConstant]
 
     # ---------- algorithm resolution ----------
     def resolve(
@@ -182,6 +210,10 @@ class KB:
     def source_rules(self, ext: str) -> list[CompiledRule]:
         return self.rules_by_ext.get(ext.lower(), [])
 
+    def resolve_family(self, raw: str) -> str:
+        """Best-effort family for a constant / bare token."""
+        return self.resolve(raw).get("family", "UNKNOWN")
+
 
 @functools.lru_cache(maxsize=1)
 def get_kb() -> KB:
@@ -211,8 +243,32 @@ def get_kb() -> KB:
         for e in exts:
             rules_by_ext.setdefault(e.lower(), []).extend(compiled)
 
+    misuse_spec = _load("misuse.yaml")
+    misuse_rules: list[MisuseRule] = []
+    for r in misuse_spec.get("rules", []):
+        try:
+            rx = re.compile(r["regex"], re.IGNORECASE)
+        except re.error as e:  # pragma: no cover
+            raise ValueError(f"bad misuse regex {r['id']}: {e}") from e
+        misuse_rules.append(MisuseRule(
+            id=r["id"], rx=rx, title=r["title"], severity=r["severity"],
+            category=r["category"], cwe=r.get("cwe"),
+            description=r.get("description", ""), remediation=r.get("remediation", ""),
+            extensions=tuple(e.lower() for e in r.get("extensions", [])),
+        ))
+
+    const_spec = _load("constants.yaml")
+    constants = [
+        CryptoConstant(
+            id=c["id"], hex=c["hex"].lower(), family=c["family"], name=c["name"],
+            primitive=c.get("primitive"), note=c.get("note"),
+        )
+        for c in const_spec.get("constants", [])
+    ]
+
     return KB(
         version=str(algorithms.get("version", "dev")),
         algorithms=algorithms, aliases=aliases, libraries=libraries,
         pqc=pqc, policy=policy, rules_by_ext=rules_by_ext,
+        misuse_rules=misuse_rules, constants=constants,
     )

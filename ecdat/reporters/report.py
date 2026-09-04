@@ -69,6 +69,41 @@ def render_html(result: ScanResult) -> str:
 
     skipped = ", ".join(f"{k}: {v}" for k, v in result.coverage.files_skipped.items()) or "none"
 
+    # weaknesses
+    sev_c = {"critical": "#cf222e", "high": "#bc4c00", "medium": "#9a6700",
+             "low": "#57606a", "info": "#8c959f"}
+    findings_html = ""
+    for f in result.findings[:40]:
+        findings_html += (
+            f"<div class='card'><h3 style='color:{sev_c.get(f.severity.value)}'>"
+            f"[{f.severity.value.upper()}] {_esc(f.title)}</h3>"
+            f"<p class='loc'>{_esc(f.location)}  ·  {f.category}"
+            + (f"  ·  {f.cwe}" if f.cwe else "") + "</p>"
+            f"<pre>{_esc(f.snippet or '')}</pre>"
+            f"<p>{_esc(f.description)}</p>"
+            f"<p><b>Fix:</b> {_esc(f.remediation)}</p></div>"
+        )
+    from collections import Counter
+    fcount = Counter(f.severity.value for f in result.findings)
+
+    # pqc readiness
+    rd = result.pqc_readiness
+    tl = rd.quantum_risk_timeline
+    tl_bars = ""
+    if tl:
+        mx = max((t["exposed_assets"] for t in tl), default=1) or 1
+        for t in tl:
+            h = int(60 * t["exposed_assets"] / mx)
+            tl_bars += (f"<span style='display:inline-block;width:22px;text-align:center;"
+                        f"vertical-align:bottom'><span style='display:block;height:{h}px;"
+                        f"background:#bc4c00;margin:0 2px'></span>"
+                        f"<span class='loc'>{str(t['year'])[2:]}</span></span>")
+    waves_html = "".join(
+        f"<tr><td>Wave {w.order}</td><td>{_esc(w.name)}</td><td>{w.effort}</td>"
+        f"<td class='n'>{w.asset_count}</td><td class='n'>{w.risk_reduction:.0f}</td></tr>"
+        for w in rd.migration_waves
+    )
+
     return f"""<!doctype html><html><head><meta charset="utf-8"><title>ECDAT report — {_esc(result.target)}</title>
 <style>
  body{{font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:#1a1f24;max-width:820px;margin:32px auto;padding:0 20px;line-height:1.5}}
@@ -92,6 +127,9 @@ def render_html(result: ScanResult) -> str:
  <li><b>{p.by_status.get('vulnerable',0)}</b> quantum-vulnerable, <b>{p.by_status.get('broken',0)}</b> already broken, <b>{p.by_status.get('weakened',0)}</b> weakened.</li>
  <li><b>{p.hndl_count}</b> assets exposed to harvest-now-decrypt-later.</li>
  <li><b>{p.at_risk_count}</b> assets fail Mosca's inequality under the current assumptions.</li>
+ <li><b>{len(result.findings)}</b> cryptographic weaknesses / misuse findings
+   ({fcount.get('critical',0)} critical, {fcount.get('high',0)} high).</li>
+ <li>Crypto-agility index <b>{rd.crypto_agility_index:.0f}/100</b> (grade {rd.agility_grade}).</li>
 </ul>
 
 <h2>Highest risk</h2>
@@ -100,6 +138,25 @@ def render_html(result: ScanResult) -> str:
 
 <h2>Harvest-now-decrypt-later exposure</h2>
 <ul>{hndl_rows}</ul>
+<p class="meta">{rd.hndl_at_rest_count} of these protect long-lived (SECRET/PCI/PII) data — the highest HNDL priority.</p>
+
+<h2>Cryptographic weaknesses &amp; misuse</h2>
+<p><b>{len(result.findings)}</b> findings —
+ {fcount.get('critical',0)} critical, {fcount.get('high',0)} high, {fcount.get('medium',0)} medium, {fcount.get('low',0)} low.</p>
+{findings_html or '<p>none</p>'}
+
+<h2>Post-quantum readiness</h2>
+<p><span class="grade" style="background:{_grade_color(rd.agility_grade)}">{rd.agility_grade}</span>
+&nbsp; Crypto-agility index <b>{rd.crypto_agility_index:.0f}/100</b> — how readily the estate can be made quantum-safe.</p>
+<p><b>India NQM roadmap:</b>
+ {rd.nqm_phase_counts.get('high-priority-2028',0)} systems for the Dec-2028 high-priority wave,
+ {rd.nqm_phase_counts.get('full-adoption-2029',0)} for full adoption by Dec-2029,
+ {rd.nqm_phase_counts.get('no-action',0)} already quantum-safe.</p>
+<h3>Quantum-risk timeline — assets exposed if a quantum computer arrives in year&hellip;</h3>
+<div style="border-bottom:1px solid #ddd;padding-bottom:4px">{tl_bars}</div>
+<h3>Migration waves</h3>
+<table><thead><tr><th>Wave</th><th>Scope</th><th>Effort</th><th class="n">Assets</th><th class="n">Risk removed</th></tr></thead>
+<tbody>{waves_html}</tbody></table>
 
 <h2>Critical &amp; high assets</h2>
 {crit_details or '<p>none</p>'}

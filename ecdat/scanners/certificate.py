@@ -26,7 +26,7 @@ class CertificateScanner(Scanner):
                 data = path.read_bytes()
             except OSError:
                 continue
-            ctx.files_parsed += 1
+            ctx.mark(path)
             rel = ctx.rel(path)
             yield from _from_bytes(data, rel)
 

@@ -17,8 +17,19 @@ MAX_FILE_BYTES = 2_000_000
 @dataclass
 class ScanContext:
     root: Path
-    files_parsed: int = 0
+    _parsed: set = field(default_factory=set)
     files_skipped: dict[str, int] = field(default_factory=dict)
+
+    @property
+    def files_parsed(self) -> int:
+        return len(self._parsed)
+
+    @files_parsed.setter
+    def files_parsed(self, _v: int) -> None:  # tolerate `ctx.files_parsed += 1`
+        pass
+
+    def mark(self, p) -> None:
+        self._parsed.add(str(p))
 
     def skip(self, reason: str) -> None:
         self.files_skipped[reason] = self.files_skipped.get(reason, 0) + 1

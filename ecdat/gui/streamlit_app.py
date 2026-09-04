@@ -16,6 +16,7 @@ from ecdat.domain.risk import assess
 from ecdat.reporters.cbom import to_cbom
 from ecdat.reporters.json_out import to_json
 from ecdat.reporters.report import render_html
+from ecdat.reporters.sarif import to_sarif
 
 st.set_page_config(page_title="ECDAT Console", layout="wide", page_icon="🔐")
 
@@ -49,7 +50,7 @@ st.sidebar.title("🔐 ECDAT")
 result = _get_result()
 if result:
     st.sidebar.caption(f"scan of `{Path(result.target).name}`  ·  {result.posture.total_assets} assets")
-    views = ["Scan", "Overview", "Inventory", "Mosca Lab", "Coverage"]
+    views = ["Scan", "Overview", "Inventory", "Weaknesses", "PQC Readiness", "Mosca Lab", "Coverage"]
     default_ix = 1
 else:
     st.sidebar.caption("no scan loaded")
@@ -128,10 +129,11 @@ if view == "Scan":
     if result:
         st.divider()
         st.markdown("**Downloads for the loaded scan**")
-        d1, d2, d3 = st.columns(3)
+        d1, d2, d3, d4 = st.columns(4)
         d1.download_button("cbom.json", to_cbom(result), "cbom.json", "application/json")
         d2.download_button("result.json", to_json(result), "result.json", "application/json")
         d3.download_button("report.html", render_html(result), "report.html", "text/html")
+        d4.download_button("results.sarif", to_sarif(result), "results.sarif", "application/json")
 
     st.stop()
 
@@ -150,6 +152,14 @@ if view == "Overview":
     c[2].metric("Quantum-vulnerable", p.by_status.get("vulnerable", 0))
     c[3].metric("HNDL exposed", p.hndl_count)
     c[4].metric("At risk · Mosca", p.at_risk_count)
+    crit_hi = sum(1 for f in result.findings if f.severity.value in ("critical", "high"))
+    c2 = st.columns(5)
+    c2[0].metric("Weaknesses", len(result.findings), f"{crit_hi} critical/high", delta_color="inverse")
+    c2[1].metric("Crypto-agility", f"{result.pqc_readiness.crypto_agility_index:.0f}",
+                 result.pqc_readiness.agility_grade)
+    c2[2].metric("NQM 2028 wave", result.pqc_readiness.nqm_phase_counts.get("high-priority-2028", 0))
+    c2[3].metric("HNDL at rest", result.pqc_readiness.hndl_at_rest_count)
+    c2[4].metric("Already safe", p.by_status.get("safe", 0))
     st.divider()
     left, right = st.columns([3, 2])
     with left:
@@ -207,6 +217,57 @@ elif view == "Inventory":
                     st.caption("libraries: " + ", ".join(r.library_support))
             else:
                 st.success("No action — quantum-safe at current parameters.")
+
+# ================= WEAKNESSES =================
+elif view == "Weaknesses":
+    st.subheader("Cryptographic weaknesses & misuse")
+    st.caption("Threat findings — insecure use of cryptography, distinct from the quantum inventory.")
+    if not result.findings:
+        st.success("No crypto-misuse findings.")
+    else:
+        cats = sorted({f.category for f in result.findings})
+        pick = st.multiselect("Category", cats)
+        items = [f for f in result.findings if not pick or f.category in pick]
+        sev_color = {"critical": "🔴", "medium": "🟡", "high": "🟠", "low": "⚪", "info": "⚫"}
+        df = pd.DataFrame([{
+            "severity": sev_color.get(f.severity.value, "") + " " + f.severity.value,
+            "finding": f.title, "category": f.category, "cwe": f.cwe or "",
+            "location": f.location,
+        } for f in items])
+        st.dataframe(df, hide_index=True, width="stretch", height=360)
+        labels = [f"{f.severity.value.upper()} · {f.title}  ·  {f.location}" for f in items]
+        if labels:
+            f = items[labels.index(st.selectbox("Detail", labels))]
+            st.markdown(f"### {f.title}")
+            st.caption(f"{f.location} · {f.category}" + (f" · {f.cwe}" if f.cwe else "")
+                       + (" · quantum-relevant" if f.quantum_relevant else ""))
+            if f.snippet:
+                st.code(f.snippet)
+            st.write(f.description)
+            st.markdown(f"**Fix:** {f.remediation}")
+
+# ================= PQC READINESS =================
+elif view == "PQC Readiness":
+    rd = result.pqc_readiness
+    st.subheader("Post-quantum readiness")
+    m = st.columns(4)
+    m[0].metric("Crypto-agility index", f"{rd.crypto_agility_index:.0f}/100", rd.agility_grade)
+    m[1].metric("High-priority (NQM 2028)", rd.nqm_phase_counts.get("high-priority-2028", 0))
+    m[2].metric("Full adoption (NQM 2029)", rd.nqm_phase_counts.get("full-adoption-2029", 0))
+    m[3].metric("Already quantum-safe", rd.nqm_phase_counts.get("no-action", 0))
+    st.divider()
+    st.markdown("**Quantum-risk timeline** — assets that fail Mosca's inequality if a "
+                "cryptographically-relevant quantum computer arrives in year …")
+    tl = pd.DataFrame(rd.quantum_risk_timeline).set_index("year")
+    st.bar_chart(tl, color="#bc4c00", height=220)
+    st.markdown("**Migration waves** — vulnerable assets sequenced by effort")
+    if rd.migration_waves:
+        wdf = pd.DataFrame([{
+            "wave": w.order, "scope": w.name, "effort": w.effort,
+            "assets": w.asset_count, "risk removed": w.risk_reduction,
+            "examples": ", ".join(w.example_assets[:3]),
+        } for w in rd.migration_waves])
+        st.dataframe(wdf, hide_index=True, width="stretch")
 
 # ================= MOSCA LAB =================
 elif view == "Mosca Lab":

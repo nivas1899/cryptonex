@@ -1,0 +1,180 @@
+# Cryptographic misuse / weakness rules -> SecurityFinding.
+# Matched against source text (any recognised extension). Regex is IGNORECASE.
+version: "2026.02"
+rules:
+  # ---- broken modes ----
+  - id: misuse.ecb
+    regex: '(AES|DES|Blowfish|SM4)/ECB|MODE_ECB|NewECBEncrypter|ECBEncryptor|"ECB"|CipherMode\.ECB|aes-\d+-ecb'
+    title: "Block cipher used in ECB mode"
+    severity: high
+    category: crypto-misuse
+    cwe: CWE-327
+    description: "ECB encrypts identical plaintext blocks to identical ciphertext, leaking structure regardless of key size or algorithm."
+    remediation: "Use an authenticated mode (AES-256-GCM, ChaCha20-Poly1305, AES-SIV)."
+
+  # ---- disabled transport security ----
+  - id: misuse.tls.verify_off.py
+    regex: 'verify\s*=\s*False|ssl\._create_unverified_context|check_hostname\s*=\s*False|CERT_NONE|PROTOCOL_TLSv1(?![._\d])|PROTOCOL_SSLv'
+    title: "TLS certificate or hostname verification disabled"
+    severity: critical
+    category: cert-validation
+    cwe: CWE-295
+    description: "Disabling certificate/hostname validation makes the connection trivially man-in-the-middleable."
+    remediation: "Remove verify=False / CERT_NONE; pin a CA bundle if needed; require TLS 1.2+."
+  - id: misuse.tls.verify_off.go
+    regex: 'InsecureSkipVerify\s*:\s*true'
+    title: "Go TLS: InsecureSkipVerify = true"
+    severity: critical
+    category: cert-validation
+    cwe: CWE-295
+    description: "InsecureSkipVerify disables all certificate validation."
+    remediation: "Set InsecureSkipVerify: false and supply a RootCAs pool for private CAs."
+  - id: misuse.tls.verify_off.node
+    regex: 'rejectUnauthorized\s*:\s*false|NODE_TLS_REJECT_UNAUTHORIZED\s*=\s*[''"]?0|checkServerIdentity\s*:\s*\(\s*\)\s*=>'
+    title: "Node.js TLS verification disabled"
+    severity: critical
+    category: cert-validation
+    cwe: CWE-295
+    description: "rejectUnauthorized:false / NODE_TLS_REJECT_UNAUTHORIZED=0 disables TLS trust checks."
+    remediation: "Set rejectUnauthorized:true; pass a `ca` for private roots."
+  - id: misuse.tls.verify_off.curl
+    regex: 'CURLOPT_SSL_VERIFY(PEER|HOST)\s*,\s*(0|false|FALSE)|--insecure\b|curl_setopt\([^)]*VERIFYPEER[^)]*,\s*0'
+    title: "libcurl / curl TLS verification disabled"
+    severity: high
+    category: cert-validation
+    cwe: CWE-295
+    remediation: "Enable CURLOPT_SSL_VERIFYPEER and CURLOPT_SSL_VERIFYHOST=2."
+  - id: misuse.tls.trustall.java
+    regex: 'TrustManager\s*\[\s*\]\s*\{[^}]*checkServerTrusted[^}]*\{\s*\}|ALLOW_ALL_HOSTNAME_VERIFIER|NoopHostnameVerifier|setHostnameVerifier\([^)]*ALLOW_ALL'
+    title: "Java: all-trusting TrustManager / HostnameVerifier"
+    severity: critical
+    category: cert-validation
+    cwe: CWE-295
+    remediation: "Use the platform default TrustManager; validate hostnames."
+
+  # ---- weak randomness ----
+  - id: misuse.rng.python
+    regex: 'random\.(random|randint|randrange|choice|getrandbits|sample|shuffle)\s*\('
+    extensions: [".py"]
+    title: "Non-cryptographic RNG (random) — use secrets for security values"
+    severity: medium
+    category: weak-rng
+    cwe: CWE-338
+    description: "The `random` module is a Mersenne-Twister PRNG; its output is predictable. Fine for simulation, not for tokens, keys, nonces, salts, or passwords."
+    remediation: "Use `secrets.token_bytes` / `secrets.SystemRandom` for anything security-sensitive."
+  - id: misuse.rng.jsmath
+    regex: 'Math\.random\s*\(\s*\)'
+    title: "Math.random() is not cryptographically secure"
+    severity: medium
+    category: weak-rng
+    cwe: CWE-338
+    remediation: "Use crypto.getRandomValues() / crypto.randomBytes()."
+  - id: misuse.rng.java
+    regex: 'new\s+java\.util\.Random\s*\(|new\s+Random\s*\(\s*\)'
+    extensions: [".java", ".kt", ".scala"]
+    title: "java.util.Random used — not cryptographically secure"
+    severity: medium
+    category: weak-rng
+    cwe: CWE-338
+    remediation: "Use java.security.SecureRandom."
+  - id: misuse.rng.c
+    regex: '\b(srand|rand)\s*\(|\brandom\s*\(\s*\)'
+    extensions: [".c", ".cc", ".cpp", ".cxx", ".h", ".hpp"]
+    title: "C rand()/srand() — predictable RNG"
+    severity: low
+    category: weak-rng
+    cwe: CWE-338
+    remediation: "Use getrandom(2), arc4random_buf, or a CSPRNG from your crypto library."
+
+  # ---- hardcoded / static key material ----
+  - id: misuse.hardcoded.key
+    regex: '(secret_?key|api_?key|private_?key|passphrase|password)\s*[:=]\s*[''"][A-Za-z0-9+/=_\-]{12,}[''"]|SecretKeySpec\s*\(\s*[''"]'
+    title: "Hardcoded key / secret literal"
+    severity: high
+    category: hardcoded-secret
+    cwe: CWE-798
+    description: "A secret embedded in source is exposed to everyone with repo access and cannot be rotated without a code change."
+    remediation: "Load secrets from a secrets manager / KMS / environment; rotate the exposed value."
+  - id: misuse.hardcoded.pem
+    regex: '-----BEGIN (RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----'
+    title: "Private key material embedded in source"
+    severity: critical
+    category: hardcoded-secret
+    cwe: CWE-321
+    remediation: "Remove the key, rotate it, and load it from a protected store at runtime."
+  - id: misuse.static.iv
+    regex: '(?:\b|_)(iv|nonce)\s*[:=]\s*(b?[''"](\\x00){4,}|bytes\(\s*1[26]\s*\)|\[\s*0\s*\]\s*\*\s*1[26]|[''"]0{12,}[''"]|new byte\s*\[\s*1[26]\s*\]|make\(\[\]byte,\s*1[26]\))'
+    title: "Static / zero IV or nonce"
+    severity: high
+    category: crypto-misuse
+    cwe: CWE-329
+    description: "A fixed IV/nonce with CBC/CTR/GCM destroys semantic security and, for GCM, catastrophically breaks authentication on nonce reuse."
+    remediation: "Generate a fresh random IV/nonce per message and prepend it to the ciphertext."
+  - id: misuse.static.salt
+    regex: '\bsalt\s*[:=]\s*(b?[''"][A-Za-z0-9+/=]{4,}[''"]|[''"]{2}|None)'
+    title: "Hardcoded or empty KDF salt"
+    severity: medium
+    category: crypto-misuse
+    cwe: CWE-760
+    remediation: "Use a per-user random salt of >=16 bytes, stored alongside the hash."
+
+  # ---- weak parameters ----
+  - id: misuse.rsa.small
+    regex: 'key_size\s*=\s*(512|768|1024)\b|RSA\.generate\s*\(\s*(512|1024)|GenerateKey\s*\([^,]*,\s*(512|1024)\s*\)|rsa:1024|numbits.{0,4}1024'
+    title: "RSA key < 2048 bits"
+    severity: high
+    category: weak-parameters
+    cwe: CWE-326
+    description: "RSA moduli below 2048 bits are factorable with modest resources; 1024-bit is deprecated (NIST SP 800-131A)."
+    remediation: "Use RSA-3072+ now and plan the move to ML-DSA / ML-KEM."
+  - id: misuse.dh.small
+    regex: '\bmodp(768|1024)\b|dh.{0,6}(512|768|1024)\b|Group\s*[12]\b'
+    title: "Diffie-Hellman group < 2048 bits"
+    severity: high
+    category: weak-parameters
+    cwe: CWE-326
+    remediation: "Use >=2048-bit groups and add an ML-KEM hybrid (RFC 9370 for IKEv2)."
+  - id: misuse.pbkdf2.iterations
+    regex: 'pbkdf2[_a-z]*\([^)]*,\s*(\d{1,4})\s*\)|iterations\s*=\s*(\d{1,4})\b'
+    title: "PBKDF2 iteration count looks low (< 10000)"
+    severity: medium
+    category: weak-parameters
+    cwe: CWE-916
+    remediation: "Use Argon2id, or PBKDF2-HMAC-SHA-256 with >=600,000 iterations (OWASP 2023)."
+
+  # ---- password hashing with a plain digest ----
+  - id: misuse.passwd.digest
+    regex: '(hashlib\.(md5|sha1|sha256)|MessageDigest\.getInstance\s*\(\s*[''"](MD5|SHA-1|SHA-256))[^)\n]{0,60}(pass|pwd|credential)'
+    title: "Password hashed with a fast digest (MD5/SHA)"
+    severity: high
+    category: crypto-misuse
+    cwe: CWE-916
+    description: "Fast hashes allow billions of guesses/sec on a GPU. Password storage needs a slow, salted KDF."
+    remediation: "Use Argon2id (preferred), scrypt, or bcrypt."
+
+  # ---- JWT / signature confusion ----
+  - id: misuse.jwt.none
+    regex: 'alg[''"]?\s*[:=]\s*[''"]none[''"]|algorithms\s*[:=]\s*\[\s*\]|["'']none["''].{0,15}alg'
+    title: "JWT 'alg: none' or empty algorithm allow-list"
+    severity: critical
+    category: algorithm-confusion
+    cwe: CWE-347
+    description: "Accepting alg:none lets an attacker forge tokens with no signature."
+    remediation: "Pin an explicit allow-list of algorithms; never accept 'none'."
+  - id: misuse.jwt.noverify
+    regex: 'jwt\.decode\([^)]*(verify\s*=\s*False|verify_signature[''"]?\s*:\s*False|options\s*=\s*\{[^}]*verify_signature[^}]*False)'
+    title: "JWT decoded without signature verification"
+    severity: critical
+    category: algorithm-confusion
+    cwe: CWE-347
+    remediation: "Always verify the signature and the exp/aud/iss claims."
+
+  # ---- other ----
+  - id: misuse.cbc.nomac
+    regex: 'AES/CBC/(NoPadding|PKCS5Padding|PKCS7)|MODE_CBC|NewCBCEncrypter'
+    title: "Unauthenticated CBC — verify a MAC is applied (encrypt-then-MAC)"
+    severity: low
+    category: crypto-misuse
+    cwe: CWE-353
+    description: "CBC without an integrity check is vulnerable to padding-oracle and bit-flipping attacks."
+    remediation: "Prefer an AEAD mode (GCM); if CBC is required, apply HMAC over the ciphertext (encrypt-then-MAC)."

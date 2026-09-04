@@ -60,6 +60,17 @@ class Confidence(str, Enum):
     AI_ASSISTED = "ai-assisted"
 
 
+class Severity(str, Enum):
+    INFO = "info"
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    CRITICAL = "critical"
+
+
+SEVERITY_ORDER_LIST = [Severity.INFO, Severity.LOW, Severity.MEDIUM, Severity.HIGH, Severity.CRITICAL]
+
+
 # ---- ordered weightings used by the risk engine (domain/risk.py) ----
 
 STATUS_WEIGHT = {

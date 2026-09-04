@@ -29,7 +29,7 @@ class SourceScanner(Scanner):
             if text is None:
                 ctx.skip("unreadable")
                 continue
-            ctx.files_parsed += 1
+            ctx.mark(path)
             lines = text.splitlines()
             rel = ctx.rel(path)
             for rule in rules:

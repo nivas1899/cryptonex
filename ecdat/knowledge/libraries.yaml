@@ -31,3 +31,32 @@ libraries:
   - {ecosystem: npm, name: "node-rsa", flag: true, reason: "RSA-only helper.", provides: [{raw: rsa}]}
 
   - {ecosystem: go, name: "golang.org/x/crypto", provides: [{raw: ed25519}, {raw: chacha20}]}
+
+  # --- additional coverage ---
+  - {ecosystem: pip, name: pynacl, provides: [{raw: ed25519}, {raw: x25519}, {raw: "chacha20-poly1305"}]}
+  - {ecosystem: pip, name: "m2crypto", flag: true, reason: "M2Crypto is lightly maintained and ships OpenSSL-1.x bindings.", provides: [{raw: rsa}, {raw: "aes-256-cbc"}]}
+  - {ecosystem: pip, name: "pycrypto", flag: true, reason: "PyCrypto is unmaintained since 2013 and has known vulnerabilities (CVE-2013-7459).", provides: [{raw: rsa}, {raw: "aes-256-cbc"}, {raw: des}]}
+  - {ecosystem: pip, name: "oscrypto", provides: [{raw: rsa}, {raw: ecdsa}]}
+  - {ecosystem: pip, name: "python-jose", flag: true, reason: "python-jose has had algorithm-confusion advisories; verify the pinned version.", provides: [{raw: hs256}, {raw: rs256}]}
+  - {ecosystem: pip, name: "authlib", provides: [{raw: rs256}, {raw: es256}]}
+  - {ecosystem: pip, name: "liboqs-python", provides: [{raw: "ml-kem"}, {raw: "ml-dsa"}]}
+  - {ecosystem: pip, name: "quantcrypt", provides: [{raw: "ml-kem"}, {raw: "ml-dsa"}]}
+
+  - {ecosystem: npm, name: crypto-js, flag: true, reason: "crypto-js defaults and PBKDF2 iteration counts are weak; the maintained fork or WebCrypto is preferred.", provides: [{raw: "aes-256-cbc"}, {raw: md5}, {raw: sha1}]}
+  - {ecosystem: npm, name: jsrsasign, provides: [{raw: rsa}, {raw: ecdsa}]}
+  - {ecosystem: npm, name: elliptic, flag: true, reason: "`elliptic` has had signature-malleability / timing advisories (CVE-2024-48948 family).", provides: [{raw: ecdsa}]}
+  - {ecosystem: npm, name: tweetnacl, provides: [{raw: ed25519}, {raw: x25519}]}
+  - {ecosystem: npm, name: "@noble/curves", provides: [{raw: ecdsa}, {raw: ed25519}]}
+  - {ecosystem: npm, name: "@noble/post-quantum", provides: [{raw: "ml-kem"}, {raw: "ml-dsa"}]}
+
+  - {ecosystem: maven, name: "org.bouncycastle:bcpkix-jdk15on", version_lt: "1.71", flag: true, reason: "Pre-PQC BouncyCastle PKIX.", provides: [{raw: rsa}, {raw: ecdsa}]}
+  - {ecosystem: maven, name: "com.nimbusds:nimbus-jose-jwt", provides: [{raw: rs256}, {raw: es256}]}
+  - {ecosystem: maven, name: "io.jsonwebtoken:jjwt", provides: [{raw: hs256}, {raw: rs256}]}
+  - {ecosystem: maven, name: "org.bouncycastle:bcprov-jdk18on", version_lt: "1.78", flag: true, reason: "BouncyCastle < 1.78 predates hardened ML-KEM/ML-DSA.", provides: [{raw: rsa}, {raw: ecdsa}, {raw: dh}]}
+
+  - {ecosystem: go, name: "github.com/cloudflare/circl", provides: [{raw: "ml-kem"}, {raw: "ml-dsa"}, {raw: x25519}]}
+  - {ecosystem: go, name: "github.com/dgrijalva/jwt-go", flag: true, reason: "dgrijalva/jwt-go is deprecated and had an auth-bypass (CVE-2020-26160); migrate to golang-jwt/jwt.", provides: [{raw: hs256}, {raw: rs256}]}
+  - {ecosystem: go, name: "github.com/golang-jwt/jwt", provides: [{raw: hs256}, {raw: rs256}]}
+
+  - {ecosystem: pip, name: "django", provides: [{raw: pbkdf2}]}
+  - {ecosystem: pip, name: "flask-bcrypt", provides: [{raw: bcrypt}]}

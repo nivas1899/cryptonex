@@ -1,0 +1,22 @@
+# Cryptographic constants — detect hand-rolled / obfuscated / statically-linked crypto
+# by fingerprinting well-known tables and initialisation values.
+# `hex` is matched against the file with all of {0x , space , \x " ' _ newline} stripped.
+version: "2026.02"
+constants:
+  - {id: const.aes.sbox,     hex: "637c777bf26b6fc53001672bfed7ab76ca82c97dfa5947f0", family: AES,      name: "AES S-box",            note: "AES SubBytes forward S-box"}
+  - {id: const.aes.invsbox,  hex: "52096ad53036a538bf40a39e81f3d7fb7ce339829b2fff87", family: AES,      name: "AES inverse S-box"}
+  - {id: const.aes.rcon,     hex: "01020408102040801b366cd8ab4d9a2f",                     family: AES,      name: "AES round constants (Rcon)"}
+  - {id: const.sha256.k,     hex: "428a2f98713744915b0fbcfe9b5dba53956c25b3e59f111f1", family: SHA-2,    name: "SHA-256 round constants"}
+  - {id: const.sha256.h,     hex: "6a09e667bb67ae853c6ef372a54ff53a510e527f9b05688c1f83d9ab5be0cd19", family: SHA-2, name: "SHA-256 initial hash values"}
+  - {id: const.sha512.k,     hex: "428a2f98d728ae227137449123ef65cdb5c0fbcfec4d3b2f", family: SHA-2,    name: "SHA-512 round constants"}
+  - {id: const.sha1.k,       hex: "5a8279996ed9eba18f1bbcdcca62c1d6",                     family: SHA-1,    name: "SHA-1 round constants"}
+  - {id: const.md5.t,        hex: "d76aa478e8c7b756242070dbc1bdceeef57c0faf4787c62a", family: MD5,      name: "MD5 T-table (sine constants)"}
+  - {id: const.md5.init,     hex: "0123456789abcdeffedcba9876543210",                     family: MD5,      name: "MD5 initial state"}
+  - {id: const.blowfish.p,   hex: "243f6a8885a308d313198a2e03707344a4093822299f31d0", family: Blowfish, name: "Blowfish P-array (pi digits)"}
+  - {id: const.des.pc1,      hex: "3932312a2221191211090a3a3b333b2b23",                   family: DES,      name: "DES key-schedule table"}
+  - {id: const.nistp256.p,   hex: "ffffffff00000001000000000000000000000000ffffffffffffffffffffffff", family: ECC, name: "NIST P-256 field prime", primitive: signature}
+  - {id: const.nistp256.b,   hex: "5ac635d8aa3a93e7b3ebbd55769886bc651d06b0cc53b0f63bce3c3e27d2604b", family: ECC, name: "NIST P-256 curve parameter b", primitive: signature}
+  - {id: const.secp256k1.p,  hex: "fffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f", family: ECC, name: "secp256k1 field prime", primitive: signature}
+  - {id: const.curve25519.p, hex: "7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffed", family: ECC, name: "Curve25519 field prime", primitive: key-agreement}
+  - {id: const.chacha.sigma, hex: "657870616e642033322d62797465206b",                     family: ChaCha20, name: "ChaCha20 constant (\"expand 32-byte k\")"}
+  - {id: const.crc32,        hex: "00000000772073961ee20fb6c33b25e5",                     family: UNKNOWN,  name: "CRC-32 table (not cryptographic — often mistaken for one)"}

@@ -11,7 +11,7 @@ LABEL org.opencontainers.image.title="ECDAT" \
       org.opencontainers.image.description="Enterprise Cryptographic Discovery & Analysis Tool"
 RUN useradd -m -u 65532 ecdat
 COPY --from=build /src/dist/*.whl /tmp/
-RUN pip install --no-cache-dir /tmp/*.whl "streamlit>=1.30" && rm /tmp/*.whl
+RUN pip install --no-cache-dir /tmp/*.whl "streamlit>=1.30" "pandas>=2.0" "lief>=0.14" && rm /tmp/*.whl
 USER 65532
 WORKDIR /scan
 ENTRYPOINT ["ecdat"]

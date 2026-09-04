@@ -12,6 +12,7 @@ from ecdat.domain.enums import (
     Effort,
     Primitive,
     QuantumStatus,
+    Severity,
 )
 
 EvidenceKind = Literal[
@@ -134,6 +135,40 @@ class GraphEdge(BaseModel):
     kind: Literal["invokes", "implements", "depends-on", "signed-by", "contains", "issued-by"]
 
 
+class SecurityFinding(BaseModel):
+    """A cryptographic weakness or misuse — distinct from an inventoried asset."""
+    id: str
+    rule_id: str
+    title: str
+    severity: Severity
+    category: str  # crypto-misuse | weak-rng | cert-validation | hardcoded-secret |
+                   # algorithm-confusion | hand-rolled-crypto | weak-parameters | quantum
+    cwe: str | None = None
+    location: str
+    snippet: str | None = None
+    description: str = ""
+    remediation: str = ""
+    quantum_relevant: bool = False
+
+
+class MigrationWave(BaseModel):
+    order: int
+    name: str
+    effort: str
+    asset_count: int
+    risk_reduction: float          # sum of risk_score across the wave's assets
+    example_assets: list[str] = Field(default_factory=list)
+
+
+class PQCReadiness(BaseModel):
+    crypto_agility_index: float = 100.0   # 0..100, higher = easier to migrate
+    agility_grade: str = "A"
+    migration_waves: list[MigrationWave] = Field(default_factory=list)
+    nqm_phase_counts: dict[str, int] = Field(default_factory=dict)   # inventory-2027 / high-priority-2028 / full-2029
+    quantum_risk_timeline: list[dict] = Field(default_factory=list)  # [{year, exposed_assets}]
+    hndl_at_rest_count: int = 0
+
+
 class Posture(BaseModel):
     total_assets: int = 0
     by_status: dict[str, int] = Field(default_factory=dict)
@@ -152,7 +187,7 @@ class CoverageStatement(BaseModel):
 
 
 class ScanResult(BaseModel):
-    schema_version: str = "1.0"
+    schema_version: str = "1.1"
     tool_version: str
     kb_version: str
     config_hash: str
@@ -160,6 +195,8 @@ class ScanResult(BaseModel):
     started_at: datetime
     finished_at: datetime
     assets: list[CryptoAsset] = Field(default_factory=list)
+    findings: list[SecurityFinding] = Field(default_factory=list)
     graph: list[GraphEdge] = Field(default_factory=list)
     posture: Posture = Field(default_factory=Posture)
+    pqc_readiness: PQCReadiness = Field(default_factory=PQCReadiness)
     coverage: CoverageStatement = Field(default_factory=CoverageStatement)

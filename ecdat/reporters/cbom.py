@@ -114,6 +114,7 @@ def to_cbom(result: ScanResult, no_timestamp: bool = False) -> str:
         for k, v in sorted(deps.items())
     ]
 
+    rd = result.pqc_readiness
     metadata: dict = {
         "tools": {"components": [{"type": "application", "name": "ECDAT", "version": result.tool_version}]},
         "properties": [
@@ -121,11 +122,31 @@ def to_cbom(result: ScanResult, no_timestamp: bool = False) -> str:
             {"name": "ecdat:configHash", "value": result.config_hash},
             {"name": "ecdat:postureScore", "value": str(result.posture.posture_score)},
             {"name": "ecdat:postureGrade", "value": result.posture.grade},
+            {"name": "ecdat:cryptoAgilityIndex", "value": str(rd.crypto_agility_index)},
+            {"name": "ecdat:findingsCount", "value": str(len(result.findings))},
+            {"name": "ecdat:nqmHighPriority2028", "value": str(rd.nqm_phase_counts.get("high-priority-2028", 0))},
             {"name": "ecdat:target", "value": result.target},
         ],
     }
     if not no_timestamp:
         metadata["timestamp"] = result.finished_at.isoformat()
+
+    _RATING = {"critical": 9.5, "high": 7.5, "medium": 5.0, "low": 3.0, "info": 1.0}
+    vulnerabilities = [
+        {
+            "bom-ref": f"weakness/{f.id}",
+            "id": f.rule_id,
+            "ratings": [{"severity": f.severity.value, "score": _RATING[f.severity.value],
+                        "method": "other"}],
+            "cwes": [int(f.cwe.split("-")[1])] if f.cwe and f.cwe.startswith("CWE-") else [],
+            "description": f.title + " — " + f.description,
+            "recommendation": f.remediation,
+            "affects": [{"ref": f.location}],
+            "properties": [{"name": "ecdat:category", "value": f.category},
+                           {"name": "ecdat:quantumRelevant", "value": str(f.quantum_relevant).lower()}],
+        }
+        for f in result.findings
+    ]
 
     doc = {
         "bomFormat": "CycloneDX",
@@ -135,5 +156,6 @@ def to_cbom(result: ScanResult, no_timestamp: bool = False) -> str:
         "metadata": metadata,
         "components": components,
         "dependencies": dependencies,
+        "vulnerabilities": vulnerabilities,
     }
     return json.dumps(doc, indent=2, sort_keys=False)

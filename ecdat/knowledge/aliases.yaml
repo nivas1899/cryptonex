@@ -85,6 +85,32 @@ aliases:
   dilithium: {family: ML-DSA, name: ML-DSA, primitive: signature}
   "slh-dsa": {family: SLH-DSA, name: SLH-DSA, primitive: signature}
   sphincs: {family: SLH-DSA, name: SLH-DSA, primitive: signature}
+  falcon: {family: FN-DSA, name: FN-DSA, primitive: signature}
+  "fn-dsa": {family: FN-DSA, name: FN-DSA, primitive: signature}
+  hqc: {family: HQC, name: HQC, primitive: kem}
+  xmss: {family: XMSS, name: XMSS, primitive: signature}
+  lms: {family: LMS, name: LMS, primitive: signature}
+  camellia: {family: Camellia, name: Camellia, primitive: block-cipher}
+  aria: {family: ARIA, name: ARIA, primitive: block-cipher}
+  seed: {family: SEED, name: SEED, primitive: block-cipher}
+  sm2: {family: SM2, name: SM2, primitive: signature}
+  sm3: {family: SM3, name: SM3, primitive: hash}
+  sm4: {family: SM4, name: SM4, primitive: block-cipher}
+  gost: {family: GOST, name: GOST, primitive: block-cipher}
+  idea: {family: IDEA, name: IDEA, primitive: block-cipher}
+  "cast5": {family: CAST, name: CAST-128, primitive: block-cipher}
+  "cast-128": {family: CAST, name: CAST-128, primitive: block-cipher}
+  poly1305: {family: Poly1305, name: Poly1305, primitive: mac}
+  hkdf: {family: HKDF, name: HKDF, primitive: kdf}
+  ed448: {family: Ed448, name: Ed448, primitive: signature}
+  x448: {family: X448, name: X448, primitive: key-agreement}
+  "xchacha20-poly1305": {family: ChaCha20, name: XChaCha20-Poly1305, primitive: aead}
+  secp256k1: {family: ECC, name: "ECDSA (secp256k1)", primitive: signature, params: {curve: secp256k1}}
+  brainpoolp256r1: {family: ECC, name: "ECDSA (brainpoolP256r1)", primitive: signature, params: {curve: brainpoolP256r1}}
+  "aes-256-gcm-siv": {family: AES, name: AES-256-GCM-SIV, primitive: aead, params: {key_size: 256, mode: GCM-SIV}}
+  "aes-128-ecb": {family: AES, name: AES, primitive: block-cipher, params: {key_size: 128, mode: ECB}}
+  "aes-256-ecb": {family: AES, name: AES, primitive: block-cipher, params: {key_size: 256, mode: ECB}}
+  kerberos: {family: Kerberos, name: Kerberos, primitive: other}
 
 # token -> family fallback when no exact alias matches
 tokens:
