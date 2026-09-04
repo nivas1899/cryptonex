@@ -55,13 +55,24 @@ def render_html(result: ScanResult) -> str:
     crit_details = ""
     for a in [x for x in rows if x.criticality.value in ("critical", "high") and x.risk_score > 0][:10]:
         rec = a.recommendation
+        ab = a.assessment
         crit_details += (
             f"<div class='card'><h3>{_esc(a.name)} "
             f"<span style='color:{_SEV.get(a.quantum_status.value)}'>[{a.quantum_status.value}]</span></h3>"
-            f"<p class='loc'>{_esc(a.locations[0].component) if a.locations else ''} · {a.criticality.value} · risk {a.risk_score:.0f}</p>"
+            f"<p class='loc'>{_esc(a.locations[0].component) if a.locations else ''} · risk {a.risk_score:.0f}</p>"
             f"<pre>{_esc(a.detection.evidence[0].snippet or '')}</pre>"
-            f"<p><b>Mosca:</b> {_esc(a.mosca_result.formula) if a.mosca_result else ''}</p>"
-            + (f"<p><b>Recommend:</b> {_esc(rec.target_algorithm)}"
+            "<table><tr><td style='vertical-align:top;width:50%'>"
+            "<b>Observed (evidence-backed)</b><ul>"
+            + "".join(f"<li>{_esc(x)}</li>" for x in ab.observed)
+            + "</ul><b>Knowledge base (cited)</b><ul>"
+            + "".join(f"<li>{_esc(x)}</li>" for x in ab.kb_derived)
+            + "</ul></td><td style='vertical-align:top'>"
+            "<b>Inferred (heuristic — verify)</b><ul>"
+            + "".join(f"<li>{_esc(x)}</li>" for x in ab.inferred)
+            + "</ul><b>Assumed (operator-set)</b><ul>"
+            + "".join(f"<li>{_esc(x)}</li>" for x in ab.assumed)
+            + "</ul></td></tr></table>"
+            + (f"<p><b>Recommendation:</b> {_esc(rec.target_algorithm)}"
                + (f" (hybrid: {_esc(rec.hybrid_option)})" if rec.hybrid_option else "")
                + f" — {_esc(rec.rationale)}</p>" if rec else "")
             + "</div>"
@@ -164,8 +175,17 @@ def render_html(result: ScanResult) -> str:
 <h2>Migration plan</h2>
 {waves or '<p>No migrations required.</p>'}
 
-<h2>Methodology &amp; coverage</h2>
+<h2>Methodology, coverage &amp; limitations</h2>
 <p class="meta">collectors: {', '.join(result.coverage.scanners_run)} · files parsed: {result.coverage.files_parsed} · skipped: {skipped}</p>
+<p><b>What this report is:</b> an <i>evidence-based</i> cryptographic inventory. Each asset's
+algorithm, parameters and location are observed facts backed by a code/certificate/binary
+citation with a stated detection confidence. Quantum status and PQC recommendations are
+deterministic knowledge-base lookups with references. <b>Business criticality, data
+classification and external-exposure are heuristic inferences</b> from path and configuration
+signals — they are starting points for a human reviewer, not organisational truth. The Mosca
+inputs X, Y and Z are configurable assumptions; ECDAT does not predict the arrival date of a
+quantum computer, it runs a transparent scenario analysis.</p>
+<p><b>Known limitations of this build:</b></p>
 <ul>{''.join(f'<li>{_esc(x)}</li>' for x in result.coverage.known_limitations)}</ul>
 </body></html>"""
 

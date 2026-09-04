@@ -70,7 +70,8 @@ def assets_df(items) -> pd.DataFrame:
     return pd.DataFrame([{
         "risk": a.risk_score, "asset": a.name, "type": a.asset_type.value,
         "family": a.algorithm_family, "primitive": a.primitive.value,
-        "status": a.quantum_status.value, "criticality": a.criticality.value,
+        "status": a.quantum_status.value, "conf.": a.detection.confidence.value,
+        "criticality": a.criticality.value,
         "data": a.data_classification, "hndl": "yes" if a.hndl_exposed else "",
         "recommended": a.recommendation.target_algorithm if a.recommendation else "—",
         "location": a.locations[0].component if a.locations else "",
@@ -201,20 +202,29 @@ elif view == "Inventory":
         with d1:
             st.markdown(f"### {a.name}")
             st.markdown(status_badge(a.quantum_status.value), unsafe_allow_html=True)
-            st.write(a.quantum_status_reason)
+            st.markdown("**🔎 Observed** — evidence-backed")
+            for e in a.assessment.observed:
+                st.caption("· " + e)
             st.code("\n".join(e.snippet or "" for e in a.detection.evidence) or "—")
-            if a.mosca_result and a.quantum_status.value != "safe":
-                st.caption("Mosca: " + a.mosca_result.formula)
+            st.markdown("**📚 Knowledge base** — deterministic, cited")
+            for e in a.assessment.kb_derived:
+                st.caption("· " + e)
         with d2:
+            st.markdown("**🧮 Inferred** — heuristic, review before acting")
+            for e in a.assessment.inferred:
+                st.caption("· " + e)
+            st.markdown("**⚙️ Assumed** — operator-set")
+            for e in a.assessment.assumed:
+                st.caption("· " + e)
+            if a.mosca_result and a.quantum_status.value != "safe":
+                st.info("Mosca: " + a.mosca_result.formula)
             if a.recommendation:
                 r = a.recommendation
-                st.markdown(f"**Recommended → `{r.target_algorithm}`**")
-                if r.hybrid_option:
-                    st.caption(f"transition: {r.hybrid_option}")
-                st.write(r.rationale)
-                st.caption(f"effort: {r.migration_effort.value} · latency: {r.latency_class or 'n/a'}")
-                if r.library_support:
-                    st.caption("libraries: " + ", ".join(r.library_support))
+                st.markdown(f"**Recommended → `{r.target_algorithm}`**"
+                            + (f"  ·  transition via `{r.hybrid_option}`" if r.hybrid_option else ""))
+                st.caption(r.rationale)
+                st.caption(f"effort: {r.migration_effort.value} · latency: {r.latency_class or 'n/a'}"
+                           + (f" · libs: {', '.join(r.library_support)}" if r.library_support else ""))
             else:
                 st.success("No action — quantum-safe at current parameters.")
 

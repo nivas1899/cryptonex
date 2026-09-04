@@ -104,5 +104,10 @@ def normalize(findings: list[RawFinding]) -> tuple[list[CryptoAsset], list[Graph
         edges.add((component, aid, "depends-on" if f.asset_type == AssetType.LIBRARY else "invokes"))
 
     graph = [GraphEdge(src=s, dst=d, kind=k) for (s, d, k) in sorted(edges)]  # type: ignore[arg-type]
+    from ecdat.domain.paths import is_test_path
+
+    for a in assets.values():
+        a.test_only = bool(a.locations) and all(is_test_path(l.component) for l in a.locations)
+
     ordered = sorted(assets.values(), key=lambda a: a.id)
     return ordered, graph

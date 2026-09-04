@@ -71,11 +71,16 @@ def _component(a: CryptoAsset) -> dict:
     props = [
         {"name": "ecdat:quantumStatus", "value": a.quantum_status.value},
         {"name": "ecdat:quantumStatusReason", "value": a.quantum_status_reason},
+        {"name": "ecdat:detectionConfidence", "value": a.detection.confidence.value},
         {"name": "ecdat:criticality", "value": a.criticality.value},
+        {"name": "ecdat:criticalityBasis", "value": "inferred: " + a.criticality_reason},
         {"name": "ecdat:riskScore", "value": str(a.risk_score)},
         {"name": "ecdat:hndlExposed", "value": str(a.hndl_exposed).lower()},
         {"name": "ecdat:occurrences", "value": str(a.occurrences)},
         {"name": "ecdat:dataClassification", "value": a.data_classification},
+        {"name": "ecdat:dataClassificationBasis", "value": "inferred: " + a.data_classification_reason},
+        {"name": "ecdat:externalFacing", "value": str(a.external_facing).lower()},
+        {"name": "ecdat:externalFacingBasis", "value": "inferred: " + a.external_facing_reason},
     ]
     if a.mosca_result and a.quantum_status.value != "safe":
         props.append({"name": "ecdat:moscaFormula", "value": a.mosca_result.formula})

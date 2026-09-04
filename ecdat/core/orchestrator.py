@@ -45,17 +45,26 @@ def run_scan(
     raw_findings: list[RawFinding] = []
     findings: list[SecurityFinding] = []
     run_names: list[str] = []
+    scanner_errors: list[str] = []
 
     for sc in all_scanners(scanners):
         run_names.append(sc.name)
-        for item in sc.scan(ctx):
-            if isinstance(item, SecurityFinding):
-                findings.append(item)
-            else:
-                raw_findings.append(item)
+        try:
+            for item in sc.scan(ctx):
+                if isinstance(item, SecurityFinding):
+                    findings.append(item)
+                else:
+                    raw_findings.append(item)
+        except Exception as exc:  # one scanner failing must not kill the scan
+            scanner_errors.append(f"collector '{sc.name}' stopped early: {type(exc).__name__}")
 
     # constant / hand-rolled-crypto pass
-    for _kind, finding, hint in scan_constants(ctx):
+    try:
+        _const = list(scan_constants(ctx))
+    except Exception as exc:
+        _const = []
+        scanner_errors.append(f"constant pass stopped early: {type(exc).__name__}")
+    for _kind, finding, hint in _const:
         findings.append(finding)
         if hint:
             try:
@@ -74,9 +83,12 @@ def run_scan(
                 confidence=Confidence.MEDIUM,
             ))
 
-    # dedupe findings by id
+    # dedupe findings by id, tag test-path findings
+    from ecdat.domain.paths import is_test_path
     findings = list({f.id: f for f in findings}.values())
-    findings.sort(key=lambda f: (-_SEV_RANK[f.severity], f.location))
+    for f in findings:
+        f.test_path = is_test_path(f.location.split("!")[-1])
+    findings.sort(key=lambda f: (f.test_path, -_SEV_RANK[f.severity], f.location))
 
     assets, graph = normalize(raw_findings)
     assets = enrich_and_assess(assets, crqc_year=crqc_year, now_year=now_year,
@@ -91,11 +103,16 @@ def run_scan(
         json.dumps(cfg, sort_keys=True).encode(), digest_size=6
     ).hexdigest()
 
-    limitations = ["detection uses regex + constant fingerprints, not full AST parsing"]
+    limitations = ["detection uses regex + constant fingerprints, not full AST parsing "
+                   "(no variable indirection, wrapper functions, or generated code)",
+                   "business criticality / data classification / external-exposure are heuristic "
+                   "inferences from path & config signals — review before acting",
+                   "CVE/RUSTSEC/GHSA advisories are a versioned offline snapshot, not a live feed"]
     if "binary" not in run_names:
         limitations.append("binary collector not run (install `lief`, or --scanners includes binary)")
     if "container" not in run_names:
         limitations.append("container collector not run")
+    limitations.extend(scanner_errors)
     limitations.append("live-network/TLS, cloud-KMS and HSM/PKCS#11 collectors: roadmap (M2)")
 
     coverage = CoverageStatement(

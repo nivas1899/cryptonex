@@ -63,6 +63,15 @@ class Location(BaseModel):
     contributor: str | None = None
 
 
+class AssessmentBasis(BaseModel):
+    """How each part of an asset's assessment was derived — so a reviewer can
+    tell observed fact from heuristic inference from operator assumption."""
+    observed: list[str] = Field(default_factory=list)     # evidence-backed
+    kb_derived: list[str] = Field(default_factory=list)   # deterministic KB lookup (cited)
+    inferred: list[str] = Field(default_factory=list)     # heuristic (path keywords, …)
+    assumed: list[str] = Field(default_factory=list)      # operator-set (X / Y / Z)
+
+
 class MoscaInputs(BaseModel):
     data_lifetime_years: float  # X
     migration_years: float  # Y
@@ -113,7 +122,9 @@ class CryptoAsset(BaseModel):
     occurrences: int = 1
 
     external_facing: bool = False
+    external_facing_reason: str = ""
     data_classification: str = "INTERNAL"
+    data_classification_reason: str = ""
 
     quantum_status: QuantumStatus = QuantumStatus.UNKNOWN
     quantum_status_reason: str = ""
@@ -121,12 +132,15 @@ class CryptoAsset(BaseModel):
     criticality: Criticality = Criticality.MEDIUM
     criticality_reason: str = ""
 
+    assessment: AssessmentBasis = Field(default_factory=AssessmentBasis)
+
     mosca_inputs: MoscaInputs | None = None
     mosca_result: MoscaResult | None = None
     risk_score: float = 0.0
     hndl_exposed: bool = False
 
     recommendation: Recommendation | None = None
+    test_only: bool = False  # every location is a test / example / fixture path
 
 
 class GraphEdge(BaseModel):
@@ -149,6 +163,7 @@ class SecurityFinding(BaseModel):
     description: str = ""
     remediation: str = ""
     quantum_relevant: bool = False
+    test_path: bool = False
 
 
 class MigrationWave(BaseModel):
@@ -171,6 +186,7 @@ class PQCReadiness(BaseModel):
 
 class Posture(BaseModel):
     total_assets: int = 0
+    test_only_assets: int = 0            # inventoried but excluded from the grade
     by_status: dict[str, int] = Field(default_factory=dict)
     by_criticality: dict[str, int] = Field(default_factory=dict)
     hndl_count: int = 0

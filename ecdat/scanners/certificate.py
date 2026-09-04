@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 import hashlib
+import warnings
 from collections.abc import Iterator
 from datetime import datetime, timezone
+
+warnings.filterwarnings("ignore", module="cryptography")
 
 from cryptography import x509
 from cryptography.hazmat.primitives.asymmetric import dsa, ec, ed448, ed25519, rsa
@@ -76,13 +79,18 @@ def _from_bytes(data: bytes, rel: str) -> Iterator[RawFinding]:
                 continue
 
     for cert in certs:
-        pub = cert.public_key()
+        try:
+            pub = cert.public_key()
+        except Exception:
+            continue
         fam, params, prim = _pub_params(pub)
         now = datetime.now(timezone.utc)
         try:
             not_after = cert.not_valid_after_utc
         except AttributeError:  # older cryptography
             not_after = cert.not_valid_after.replace(tzinfo=timezone.utc)
+        except Exception:
+            not_after = now
         expired = not_after < now
         try:
             subject = cert.subject.rfc4514_string()

@@ -7,9 +7,13 @@ from pathlib import Path
 
 from ecdat.domain.models import RawFinding
 
+from ecdat.domain.paths import is_test_path  # noqa: F401  (re-exported for scanners)
+
 SKIP_DIRS = {
     ".git", "node_modules", "vendor", "dist", "build", "__pycache__",
     ".venv", "venv", ".mypy_cache", ".pytest_cache", "target", ".tox",
+    # test-vector corpora — thousands of files, never application code
+    "vectors", "cryptography_vectors", "test-vectors", "testvectors", "wycheproof",
 }
 MAX_FILE_BYTES = 2_000_000
 

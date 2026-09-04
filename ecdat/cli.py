@@ -85,27 +85,31 @@ def _print_summary(result) -> None:
     p = result.posture
     rd = result.pqc_readiness
     from collections import Counter
-    fc = Counter(f.severity.value for f in result.findings)
+    prod_findings = [f for f in result.findings if not f.test_path]
+    fc = Counter(f.severity.value for f in prod_findings)
+    test_f = len(result.findings) - len(prod_findings)
+    test_note = f"  ·  [dim]{p.test_only_assets} test-only (excluded from grade)[/]" if p.test_only_assets else ""
     console.print(
         f"\n[bold]Posture {p.grade}[/] ({p.posture_score:.0f}/100)  ·  "
-        f"{p.total_assets} assets  ·  "
+        f"{p.total_assets} assets{test_note}  ·  "
         f"[dark_orange3]{p.by_status.get('vulnerable',0)} vulnerable[/]  "
         f"[red]{p.by_status.get('broken',0)} broken[/]  "
         f"[yellow]{p.by_status.get('weakened',0)} weakened[/]  ·  "
         f"HNDL {p.hndl_count}  ·  Mosca at-risk {p.at_risk_count}"
     )
     console.print(
-        f"[bold]Weaknesses[/] {len(result.findings)}  "
+        f"[bold]Weaknesses[/] {len(prod_findings)}  "
         f"([red]{fc.get('critical',0)} critical[/] [dark_orange3]{fc.get('high',0)} high[/] "
-        f"[yellow]{fc.get('medium',0)} medium[/] {fc.get('low',0)} low)  ·  "
-        f"crypto-agility {rd.crypto_agility_index:.0f}/100 ({rd.agility_grade})  ·  "
+        f"[yellow]{fc.get('medium',0)} medium[/] {fc.get('low',0)} low)"
+        + (f" [dim]+{test_f} in test paths[/]" if test_f else "")
+        + f"  ·  crypto-agility {rd.crypto_agility_index:.0f}/100 ({rd.agility_grade})  ·  "
         f"NQM 2028 wave: {rd.nqm_phase_counts.get('high-priority-2028',0)}"
     )
-    if result.findings:
+    if prod_findings:
         ft = Table(show_header=True, header_style="dim", box=None, pad_edge=False)
         ft.add_column("sev"); ft.add_column("finding"); ft.add_column("where")
         _fs = {"critical": "red", "high": "dark_orange3", "medium": "yellow", "low": "dim", "info": "dim"}
-        for f in result.findings[:8]:
+        for f in prod_findings[:8]:
             ft.add_row(f"[{_fs[f.severity.value]}]{f.severity.value}[/]", f.title[:52], f.location)
         console.print(ft)
     t = Table(show_header=True, header_style="dim", box=None, pad_edge=False)

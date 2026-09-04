@@ -165,16 +165,24 @@ class KB:
     def migration_years(self, effort: str) -> float:
         return float(self.policy["migration_years"].get(effort, 1.5))
 
-    def data_class_for_path(self, path: str) -> str | None:
+    def data_class_for_path(self, path: str) -> tuple[str, str] | None:
+        """Returns (classification, matched-keyword) or None."""
         p = path.lower()
         for hint in self.policy.get("data_class_hints", []):
             if hint["keyword"] in p:
-                return hint["class"]
+                return hint["class"], hint["keyword"]
         return None
 
     def is_external(self, path: str) -> bool:
         p = path.lower()
         return any(h in p for h in self.policy.get("external_hints", []))
+
+    def external_hint(self, path: str) -> str | None:
+        p = path.lower()
+        for h in self.policy.get("external_hints", []):
+            if h in p:
+                return h
+        return None
 
     def context_tags(self, path: str) -> list[str]:
         p = path.lower()

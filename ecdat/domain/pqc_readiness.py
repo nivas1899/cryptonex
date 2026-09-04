@@ -116,7 +116,8 @@ def hndl_at_rest(assets: list[CryptoAsset]) -> int:
     return n
 
 
-def build_readiness(assets: list[CryptoAsset], now_year: int) -> PQCReadiness:
+def build_readiness(all_assets: list[CryptoAsset], now_year: int) -> PQCReadiness:
+    assets = [a for a in all_assets if not a.test_only] or all_assets
     idx, grade = crypto_agility_index(assets)
     phases: dict[str, int] = {}
     for a in assets:
