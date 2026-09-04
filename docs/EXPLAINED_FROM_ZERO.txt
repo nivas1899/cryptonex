@@ -1,0 +1,950 @@
+================================================================================
+  CRYPTONEX — THE COMPLETE EXPLANATION
+  Written for someone who has never studied cryptography.
+  Smart India Hackathon 2026 · Problem Statement 26164 · Organisation: NTRO
+================================================================================
+
+HOW TO READ THIS
+  Read sections 1 to 7 once, slowly. That is all the cryptography you need to
+  understand the project and answer judges. Sections 8 to 11 are the project
+  itself. Section 17 is a dictionary you can jump to any time.
+  You do NOT need to know any maths. Nothing here uses an equation harder than
+  "X + Y > Z".
+
+
+================================================================================
+  PART A — THE BACKGROUND (learn this first)
+================================================================================
+
+--------------------------------------------------------------------------------
+1. CRYPTOGRAPHY IN 10 MINUTES
+--------------------------------------------------------------------------------
+
+Cryptography is the science of scrambling information so that only the right
+person can read it, and of proving that a message really came from who it claims.
+
+Three jobs it does:
+
+  (a) CONFIDENTIALITY — "nobody else can read this."
+      Example: when you open https://bank.com, your browser and the bank agree
+      on a secret key and scramble everything in between. A person watching the
+      wire sees noise.
+
+  (b) AUTHENTICITY / SIGNATURES — "this really came from me and was not changed."
+      Example: when your phone installs an app update, it checks a digital
+      signature. If even one byte was tampered with, the signature fails and the
+      update is rejected.
+
+  (c) KEY EXCHANGE — "let us two agree on a shared secret while a stranger is
+      listening, without them learning it." This is the magic step that makes
+      (a) possible over the open internet.
+
+TWO FAMILIES OF ALGORITHMS
+
+  SYMMETRIC crypto — one shared secret key used to both lock and unlock.
+     Fast. Used for the bulk data.
+     Main example: AES. Hash functions (SHA-256) are related tools that make a
+     fixed-size "fingerprint" of data.
+
+  ASYMMETRIC / PUBLIC-KEY crypto — a key PAIR: a public key everyone can see and
+     a private key you keep secret. Anyone can lock with your public key; only
+     you can unlock with your private key. Also used for signatures (you sign
+     with the private key, the world verifies with the public key).
+     Main examples: RSA, ECC (Elliptic Curve Cryptography), Diffie-Hellman (DH).
+
+WHY PUBLIC-KEY CRYPTO IS SAFE TODAY
+  Its security rests on maths problems that ordinary computers cannot solve in
+  any reasonable time:
+     - RSA: "factor this 617-digit number into its two prime factors."
+     - ECC / DH: "solve this discrete logarithm."
+  A normal computer would need billions of years. So we trust it.
+
+WHERE IT ALL LIVES
+  RSA and ECC are underneath almost everything: HTTPS, UPI, Aadhaar, net-banking,
+  VPNs, WhatsApp, software updates, government PKI, SSH logins, code signing,
+  TLS certificates. If you could break RSA and ECC, you could read "secure"
+  traffic and forge "trusted" signatures across the whole digital world.
+
+
+--------------------------------------------------------------------------------
+2. THE QUANTUM THREAT
+--------------------------------------------------------------------------------
+
+A quantum computer is a fundamentally different kind of machine. It is not "a
+faster laptop." It uses quantum physics to explore many possibilities at once
+for certain specific problems.
+
+In 1994 a mathematician named Peter Shor published an algorithm. On a
+large enough quantum computer, Shor's algorithm solves EXACTLY the maths
+problems that RSA, ECC, DH, DSA and ECDSA rely on — quickly.
+
+  Consequence:
+     RSA, ECC, Diffie-Hellman, DSA, ECDSA  ->  COMPLETELY BROKEN.
+     Not "weaker." Broken. The private key can be computed from the public key.
+     A signature can be forged. A recorded "secure" channel can be decrypted.
+
+  Symmetric crypto is only DENTED, not broken:
+     A different quantum algorithm (Grover's) roughly halves the strength of
+     AES and hashes. The fix is easy and cheap: use AES-256 instead of AES-128,
+     use SHA-384/512 instead of SHA-256. No redesign needed.
+
+So the quantum problem is really a PUBLIC-KEY problem: RSA, ECC and DH have to be
+replaced. Symmetric crypto just needs bigger sizes.
+
+DOES THE QUANTUM COMPUTER EXIST YET?
+  No — not one big enough. Today's machines have a few hundred noisy qubits.
+  Breaking RSA-2048 needs millions of high-quality qubits. Most expert
+  estimates put a "cryptographically-relevant quantum computer" (CRQC) in the
+  early-to-mid 2030s, but this is genuinely uncertain. It could be later. It
+  could, with a breakthrough, be sooner.
+
+  IMPORTANT: the exact date does not actually matter much. Read the next
+  section to see why.
+
+
+--------------------------------------------------------------------------------
+3. "HARVEST NOW, DECRYPT LATER" — WHY THIS IS A PROBLEM TODAY
+--------------------------------------------------------------------------------
+
+Here is the sentence that makes this urgent:
+
+   An adversary can RECORD your encrypted traffic today, store it cheaply for
+   years, and DECRYPT it later once they have a quantum computer.
+
+This is called "Harvest Now, Decrypt Later" (HNDL), or "store now, decrypt
+later." Nation-state adversaries are widely assumed to be doing it already —
+storage is cheap, and encrypted data is worth keeping.
+
+So ask: how long does my data need to stay secret?
+   - A one-time password: 30 seconds. Nobody cares.
+   - A news article: already public.
+   - Health records, defence communications, financial data, biometric data,
+     state secrets, long-term contracts: 10, 15, 25 years.
+
+Any data with a long secrecy lifetime that is protected by RSA/ECC key exchange
+TODAY is ALREADY effectively exposed — even though the quantum computer is years
+away. That data is being harvested now.
+
+That is why "we have until 2032" is the wrong way to think. If your data must
+stay secret for 15 years and migration takes 3 years, you are already too late.
+(That is Mosca's inequality — section 6.)
+
+
+--------------------------------------------------------------------------------
+4. THE FIX: POST-QUANTUM CRYPTOGRAPHY (PQC)
+--------------------------------------------------------------------------------
+
+Post-quantum cryptography = new public-key algorithms built on DIFFERENT maths
+problems that are believed to be hard for BOTH normal computers AND quantum
+computers (mostly "lattice" problems and hash-based constructions).
+
+The US standards body NIST ran an 8-year worldwide competition and, in August
+2024, published the finished standards:
+
+  STANDARD    NAME       (was called)   WHAT IT REPLACES
+  --------    ----       -------------   ----------------
+  FIPS 203    ML-KEM     Kyber           Key exchange  (replaces RSA/ECDH key transport)
+  FIPS 204    ML-DSA     Dilithium       Signatures    (replaces RSA/ECDSA signing)
+  FIPS 205    SLH-DSA    SPHINCS+        Signatures    (conservative hash-based backup)
+
+  Also in the pipeline: FN-DSA (Falcon), HQC, and the stateful hash-based
+  signature schemes XMSS / LMS for firmware.
+
+India's National Quantum Mission has ADOPTED these same NIST algorithms.
+
+HYBRID MODE
+  During the transition, many systems run a classical algorithm AND a PQC
+  algorithm together (e.g. X25519 + ML-KEM-768 in TLS). If either one is later
+  found weak, the other still protects you. CRYPTONEX recommends hybrid where
+  the target library supports it.
+
+"CRYPTO-AGILITY"
+  A system is "crypto-agile" if you can swap its algorithm WITHOUT rebuilding
+  the system — the algorithm is a setting, not hard-wired. Most legacy systems
+  are NOT agile: "RSA" is typed directly into the code in a hundred places.
+  Lack of agility is the real reason migration takes years.
+
+
+--------------------------------------------------------------------------------
+5. THE CATCH: YOU CANNOT FIX WHAT YOU CANNOT FIND
+--------------------------------------------------------------------------------
+
+The new algorithms exist and are ready. So why is this hard?
+
+Because a bank, a power utility, or a government department has THOUSANDS of
+servers, applications, code repositories, libraries, certificates, hardware
+security modules and hard-coded crypto calls — built over 20 years by people who
+have left.
+
+   Nobody has a list of where cryptography is used.
+
+Every PQC migration plan in the world therefore starts with the SAME first step:
+
+   BUILD A CRYPTOGRAPHIC INVENTORY.
+
+In standard form, that inventory is called a:
+
+   CBOM — Cryptographic Bill of Materials.
+
+Think of the "ingredients label" on a food packet. An SBOM (Software Bill of
+Materials) lists the software packages in a product. A CBOM lists the
+CRYPTOGRAPHY: every algorithm, key size, certificate, protocol and library,
+and where each one is used. There is an open standard for the file format,
+called CycloneDX CBOM.
+
+CRYPTONEX's core job is: produce that inventory automatically, then analyse it.
+
+
+--------------------------------------------------------------------------------
+6. MOSCA'S INEQUALITY — THE ONE FORMULA TO KNOW
+--------------------------------------------------------------------------------
+
+Michele Mosca's rule for "should I be worried about this piece of data?":
+
+        X   +   Y   >   Z          ->   you are already too late
+        |       |       |
+        |       |       +--  Z = years until a quantum computer can break RSA/ECC
+        |       +----------  Y = years it will take you to migrate this system
+        +------------------  X = years this data must stay secret
+
+  Worked example:
+     Health records must stay secret 15 years   -> X = 15
+     Migrating this hospital system takes 3 yrs  -> Y = 3
+     Quantum computer estimated in ~8 years      -> Z = 8
+     15 + 3 = 18  which is GREATER THAN  8
+     -> This data is ALREADY exposed to harvest-now-decrypt-later.
+
+The point of Mosca is NOT to predict a date. Z is uncertain and that is fine.
+The point is RELATIVE PRIORITISATION: out of 5,000 systems, which 40 do I fix
+first? The ones where X + Y most exceeds Z.
+
+In CRYPTONEX, X, Y and Z are adjustable inputs (sliders / presets), never a
+hard-coded date. You run scenarios.
+
+
+--------------------------------------------------------------------------------
+7. INDIA'S MANDATE (WHY JUDGES CARE)
+--------------------------------------------------------------------------------
+
+This is not theoretical. Under the National Quantum Mission (NQM), India's
+Department of Science & Technology published a task-force report,
+"Implementation of a Quantum Safe Ecosystem in India" (early 2026), with a
+timeline roughly like:
+
+  Dec 2026   Quantum-safe certification labs operational
+  Dec 2027   COMPLETE CRYPTOGRAPHIC INVENTORIES across defence, power,
+             telecom and BFSI (banking / financial services / insurance)
+  Dec 2028   Migrate high-priority systems
+  Dec 2029   Full PQC adoption
+
+Other governments have parallel deadlines: US (NSM-10, CISA/NIST), EU (2030 for
+financial infrastructure).
+
+So: tens of thousands of Indian organisations legally need EXACTLY the inventory
+CRYPTONEX produces, about 18 months from now. Today, doing it needs expensive
+foreign tools. That gap is the opportunity.
+
+
+================================================================================
+  PART B — THE PROJECT
+================================================================================
+
+--------------------------------------------------------------------------------
+8. THE PROBLEM STATEMENT — PS 26164 (NTRO), IN PLAIN WORDS
+--------------------------------------------------------------------------------
+
+TITLE:  Enterprise Cryptographic Discovery & Analysis Tool
+ORG:    NTRO (National Technical Research Organisation)
+TYPE:   Software
+
+WHAT THEY ASK FOR (paraphrased from the official statement):
+
+  "Post-quantum migration is now a hard government mandate. Step one is knowing
+   what crypto you actually have. Nobody has that inventory. Build a tool that:
+
+     i.   SCANS source code, binaries, libraries and container images to find
+          all cryptographic usage;
+     ii.  builds a CRYPTOGRAPHIC BILL OF MATERIALS (CBOM) — a catalogue of every
+          algorithm, mode, key length, certificate, library+version, and its
+          location;
+     iii. runs a QUANTUM RISK ASSESSMENT — tags each item quantum-vulnerable /
+          quantum-safe / needs-review, applies MOSCA'S INEQUALITY with
+          configurable parameters, and classifies items by business criticality
+          and key lifetime;
+     iv.  RECOMMENDS replacements — maps RSA/ECC/DH to ML-KEM / ML-DSA / SLH-DSA
+          or hybrid modes, accounting for latency, cost and compatibility;
+     v.   EXPORTS the CBOM in a standard format (CycloneDX CBOM) and provides an
+          interactive GUI that visualises the scan, the risks and the roadmap."
+
+WHY THE PS SAYS COMPETITION IS LOW:
+  "Post-quantum" scares students into thinking they must implement lattice
+  mathematics. THEY DO NOT. This is an INVENTORY AND ANALYTICS tool. The
+  scanning is ordinary static analysis. The novelty is the CBOM + Mosca scoring
+  + PQC mapping — which almost no student team knows exists. High differentiation
+  for low actual difficulty.
+
+MAIN RISK THE PS WARNS ABOUT:
+  Scope creep across scanner types. Their advice: "nail source + one binary
+  format + container images; mark HSM and cloud detection as roadmap." We did
+  exactly this.
+
+SOCIETAL NEED:
+  Aadhaar, UPI, DigiLocker and government PKI are signed and encrypted with
+  RSA/ECC that a quantum computer breaks, and HNDL adversaries collect today.
+  A FREE discovery tool lets the country's PQC transition start from a real
+  inventory instead of from zero.
+
+INDUSTRY NEED:
+  Banks, telcos and certificate authorities have regulator deadlines. The first
+  budget line of every migration is "crypto discovery," today sold by
+  IBM / Venafi / InfoSec Global as expensive products. A free CBOM generator is
+  immediately useful and is a real startup seed.
+
+
+--------------------------------------------------------------------------------
+9. WHAT WE DECIDED TO BUILD — CRYPTONEX
+--------------------------------------------------------------------------------
+
+CRYPTONEX is a free, fully OFFLINE command-line tool and local web console that:
+
+   1. DISCOVERS every cryptographic asset in a codebase — across source code,
+      dependency manifests, certificates and keys, container images and
+      compiled binaries.
+
+   2. ASSESSES each asset — is it quantum-vulnerable? how business-critical is
+      it? is it exposed to harvest-now-decrypt-later? does it fail Mosca's
+      inequality? — and rolls this up into an estate-wide posture grade.
+
+   3. RECOMMENDS a specific fix for each unsafe asset — the exact NIST PQC
+      algorithm, a hybrid transition option, the migration effort, and which
+      libraries support it — and sequences everything into a migration plan
+      mapped to India's NQM deadlines.
+
+   4. EXPORTS the result as a CycloneDX 1.6 CBOM, a SARIF file for CI/CD, raw
+      JSON, and a human-readable HTML/PDF report.
+
+ONE-LINE PITCH:
+   "You cannot migrate what you cannot see. CRYPTONEX discovers your
+    cryptographic footprint, assesses its quantum exposure, and turns it into
+    an actionable migration plan — free, offline, and in one scan."
+
+WHY "OFFLINE" MATTERS:
+   A defence or power-grid cryptographic inventory is itself sensitive — it is a
+   map of where the locks are. You cannot send that to a foreign cloud service.
+   CRYPTONEX never makes a network call. Nothing is uploaded.
+
+
+--------------------------------------------------------------------------------
+10. HOW CRYPTONEX WORKS — THE 3-STEP PIPELINE
+--------------------------------------------------------------------------------
+
+        +-----------+        +-----------+        +--------------+
+        | DISCOVER  |  --->  |  ASSESS   |  --->  |  RECOMMEND   |
+        +-----------+        +-----------+        +--------------+
+        6 scanners           quantum status       PQC algorithm
+        read the codebase    + risk score         + hybrid option
+        and produce a list   + criticality        + effort + libs
+        of crypto assets     + Mosca verdict      + migration wave
+                             + posture grade      + NQM phase
+
+  DISCOVER: six independent "collectors" (scanners) each look at one kind of
+     artefact and emit crypto assets with evidence (file, line, snippet).
+
+  ASSESS: a pure-logic engine (no I/O, fully testable) takes each asset and:
+     - looks up its quantum status in a versioned knowledge base;
+     - infers business criticality from path and config signals;
+     - infers data classification (PII / PCI / SECRET / INTERNAL ...);
+     - checks harvest-now-decrypt-later exposure;
+     - applies Mosca's inequality with the current X / Y / Z;
+     - computes a 0-100 risk score;
+     - rolls all assets up into a posture score and an A-F grade.
+
+  RECOMMEND: for every unsafe asset, a rule-based engine matches it against a
+     PQC mapping table and returns a concrete target algorithm, a hybrid
+     transition, the migration effort class, latency notes, and supporting
+     libraries. Assets are then grouped into migration WAVES by effort and
+     mapped to NQM phases.
+
+DESIGN PRINCIPLE — "KNOWLEDGE AS DATA":
+  All the cryptographic knowledge (which algorithms are broken, which library
+  versions have CVEs, which PQC algorithm replaces what) lives in versioned
+  YAML files, NOT in code. Updating knowledge = editing a data file, and the
+  CBOM records which knowledge-base version produced it.
+
+
+--------------------------------------------------------------------------------
+11. FEATURE BY FEATURE — EVERY PART, WHAT IT IS, WHAT IT DOES
+--------------------------------------------------------------------------------
+
+11.1  THE SIX SCANNERS (the DISCOVER step)
+------------------------------------------
+
+  1. SOURCE SCANNER
+     WHAT: reads source code in 12 languages (Python, Java, JavaScript, C#,
+           Rust, PHP, Ruby, Swift, Go, C/C++, plus config and shell) using
+           ~162 pattern rules.
+     FINDS: calls to crypto APIs and primitives — "this file calls RSA key
+           generation", "this uses AES in ECB mode", "this hashes with MD5",
+           "this creates an Ed25519 signing key". Captures the file, the line
+           and the code snippet as evidence.
+
+  2. DEPENDENCY SCANNER
+     WHAT: reads dependency manifests across 9 ecosystems (pip / npm / Maven /
+           Gradle / Cargo / Go modules / Composer / RubyGems / NuGet).
+     FINDS: crypto libraries and their exact versions, then cross-references
+           an advisories file (13 known CVE / RUSTSEC / GHSA entries) to raise
+           a "vulnerable-dependency" finding when a version is in a bad range.
+           Example: "pyjwt 1.7.1 — key-confusion when `algorithms` is not
+           pinned (CVE)."
+
+  3. CERTIFICATE SCANNER
+     WHAT: parses X.509 certificates and key files (.crt, .pem, .der ...).
+     FINDS: the signature algorithm, key algorithm and size, validity dates,
+           whether it is a CA (certificate authority) key, whether it is
+           self-signed. For privacy it stores only a SHA-256 fingerprint of
+           the public key, never the key itself. Hardened so real-world test
+           certificates in open-source repos do not crash it.
+
+  4. MISUSE / THREAT SCANNER
+     WHAT: 28 rules for INSECURE USE of cryptography (as opposed to just
+           "old algorithm").
+     FINDS: hard-coded keys and secrets, AES in ECB mode, static / zero IVs,
+           `verify=False` (TLS verification disabled), `InsecureSkipVerify`,
+           JWT "alg: none", weak SSH KexAlgorithms/Ciphers/MACs, non-constant-
+           time comparison of secrets, MD5/SHA1 for security, and HAND-ROLLED
+           CRYPTO — it fingerprints 28 known crypto constants (S-boxes, round
+           constants, magic numbers) to catch someone re-implementing AES, DES,
+           MD5 etc. by hand inside their own code.
+
+  5. CONTAINER-IMAGE SCANNER
+     WHAT: unpacks an OCI / `docker save` image tar, merges the layers
+           (respecting file deletions / "whiteouts"), with zip-bomb guards.
+     FINDS: it then runs the source / dependency / certificate / misuse
+           scanners over the merged filesystem, tagging every finding with the
+           image path (`image.tar!/app/...`). Also flags secret-looking
+           environment variables baked into the image.
+
+  6. BINARY SCANNER
+     WHAT: uses the `lief` library to inspect compiled executables and shared
+           libraries (ELF / PE / Mach-O).
+     FINDS: linked crypto libraries, crypto-related symbols and strings —
+           "this binary is linked against an old OpenSSL", "this embeds a
+           certificate."
+
+  Every scanner is wrapped in error handling: if one fails on a weird file, the
+  scan still completes and the failure is recorded as a coverage limitation
+  (honesty over a fake "100% success").
+
+11.2  THE KNOWLEDGE BASE (versioned YAML — "knowledge as data")
+--------------------------------------------------------------
+     - algorithms.yaml   : 42 algorithm families, each with its primitive
+                           (signature / kem / hash / block-cipher ...), quantum
+                           status, and reasoning text.
+     - aliases.yaml      : 108 alternate names -> canonical family
+                           (e.g. "rsaEncryption", "RSA-PSS" -> RSA).
+     - libraries.yaml    : 80 crypto libraries, with end-of-life flags.
+     - advisories.yaml   : 13 CVE / RUSTSEC / GHSA entries with affected
+                           version ranges.
+     - pqc_mapping.yaml  : 9 rules mapping an unsafe algorithm + context to a
+                           PQC recommendation.
+     - policy.yaml       : data-classification keyword hints, criticality
+                           weights.
+     - constants.yaml    : 28 crypto-constant fingerprints for hand-rolled
+                           detection.
+     - misuse.yaml       : 28 misuse rules.
+     - rules/*.yaml      : per-language detection rules (12 languages).
+     KB version is stamped into every report (currently "2026.02").
+
+11.3  THE QUANTUM-STATUS CLASSIFIER
+----------------------------------
+     Every asset gets one of:
+        SAFE       - quantum-resistant at current parameters (e.g. AES-256,
+                     ML-KEM, SHA-384).
+        WEAKENED   - survives but needs a bigger size (e.g. AES-128 -> AES-256).
+        VULNERABLE - broken by Shor's algorithm (RSA, ECC, DH, ECDSA, DSA).
+        BROKEN     - already broken even without quantum (MD5, SHA-1, DES, RC4).
+        UNKNOWN    - could not classify; needs human review.
+     This is a DETERMINISTIC lookup with a citation, not a guess.
+
+11.4  RISK SCORING (0-100 per asset)
+-----------------------------------
+     A transparent, published formula. In words, the risk of an asset goes UP
+     when:
+        - its quantum status is worse (broken > vulnerable > weakened > safe);
+        - its business criticality is higher (critical > high > medium > low);
+        - its Mosca "exposure" (how many years X+Y exceeds Z-now) is larger;
+        - it is external-facing rather than internal;
+        - the detection confidence is higher (we don't inflate risk on a guess);
+        - it is exposed to harvest-now-decrypt-later (x1.15 multiplier).
+     Every asset in the console can show its exact score breakdown.
+
+11.5  POSTURE SCORE & GRADE (the estate headline)
+------------------------------------------------
+     All PRODUCTION assets (test-fixture code is excluded from grading) are
+     combined into a single 0-100 posture score and an A-F letter grade:
+        A >= 85   B >= 70   C >= 55   D >= 40   F < 40
+     This is the number a manager reads first. Example demo result:
+     "46 assets, 25 weaknesses, posture B (79/100)."
+
+11.6  HNDL (HARVEST-NOW-DECRYPT-LATER) DETECTION
+-----------------------------------------------
+     Flags any asset whose primitive is a CONFIDENTIALITY primitive
+     (public-key encryption, key agreement, or KEM) that is exposed today —
+     because that is the traffic an adversary records now to decrypt later.
+     Signatures are less HNDL-sensitive (a forged signature in 2035 is less
+     useful than 2035-decrypted 2026 secrets). There is also an "HNDL at rest"
+     count for long-lived encrypted stored data.
+
+11.7  CRYPTO-AGILITY INDEX (0-100)
+---------------------------------
+     Estimates how EASY migration will be, based on how concentrated vs
+     scattered the crypto usage is, whether it goes through wrappers/config or
+     is hard-coded everywhere, and library support. A low agility index means
+     "this will hurt" even if the algorithms themselves are simple to name.
+
+11.8  MIGRATION WAVES
+--------------------
+     Unsafe assets are grouped into ordered waves by EFFORT:
+        Wave 1  drop-in       (just bump a library / flip a config)
+        Wave 2  config        (protocol / parameter change)
+        Wave 3  code          (application code changes)
+        Wave 4  architectural (roots of trust, HSM, cross-signing)
+        Wave 5  vendor / external dependency
+     Each wave shows asset count, risk removed, and examples. This turns a flat
+     list into a plan someone can actually schedule.
+
+11.9  NQM PHASE MAPPING
+----------------------
+     Every unsafe asset is tagged against India's National Quantum Mission
+     timeline: "high-priority-2028", "full-adoption-2029", or "no-action"
+     (already safe). So the plan is expressed in the language of the national
+     mandate, not just internal jargon.
+
+11.10 QUANTUM-RISK TIMELINE
+--------------------------
+     A small chart: "if a cryptographically-relevant quantum computer arrives
+     in year N, how many of your assets fail Mosca's inequality?" — plotted for
+     a range of N. Shows the risk is not a cliff on one date; it grows.
+
+11.11 MOSCA LAB (interactive)
+----------------------------
+     A dedicated console page with three sliders (X = data secrecy lifetime,
+     Y = migration time, Z = quantum threat year) and presets
+     (NIST baseline / Optimistic / Regulator-EU-2030). Move a slider and the
+     ENTIRE estate re-scores live — posture grade, at-risk count, HNDL count.
+     This is how you answer "your Z is a guess": you don't defend a date, you
+     let the organisation model their own and watch the effect.
+
+11.12 THE RECOMMENDATION ENGINE (the RECOMMEND step)
+--------------------------------------------------
+     For each unsafe asset, matches it against pqc_mapping.yaml and returns:
+        - TARGET ALGORITHM        e.g. RSA signing key -> ML-DSA-65;
+                                       long-lived root CA -> SLH-DSA-SHA2-192s;
+                                       RSA/ECDH key transport -> ML-KEM-768.
+        - HYBRID / TRANSITION     e.g. "X25519 + ML-KEM-768" where supported.
+        - MIGRATION EFFORT        drop-in / config / code / architectural.
+        - LATENCY CLASS + LIBS    which real libraries support the target
+                                  (OpenSSL 3.5+, liboqs, BouncyCastle ...).
+        - RATIONALE               one plain sentence of why.
+     Returns nothing for SAFE / UNKNOWN assets (no busywork).
+
+11.13 THE EVIDENCE / INFERENCE / ASSUMPTION MODEL  (the credibility layer)
+------------------------------------------------------------------------
+     This is what makes CRYPTONEX defensible in front of a sceptical expert.
+     Every asset's assessment is split into four clearly-labelled buckets:
+
+        OBSERVED    - evidence-backed FACTS. "certificate collector, confidence
+                      CONFIRMED, RSA-4096, CA:TRUE, subject CN=..., here is the
+                      file it came from."
+        KNOWLEDGE BASE - deterministic, cited lookups. "RSA is VULNERABLE —
+                      Shor's algorithm recovers the private key by factoring
+                      the modulus."
+        INFERRED    - HEURISTICS, shown with their reasoning. "criticality =
+                      critical because the path contains 'pki' (+22), it is a
+                      root CA (+15), it is external-facing (+30)..." A human
+                      confirms these; we never present them as organisational
+                      truth.
+        ASSUMED     - operator-set scenario inputs. "X = 20y, Y = 5y, Z = 2032
+                      -> exposed ~19 years." These are YOUR assumptions, not
+                      our predictions.
+
+     The tool NEVER blurs "we saw this" with "we think this." Test-fixture code
+     is also separated from production code so a repo full of test vectors does
+     not tank the grade.
+
+11.14 THREAT FINDINGS (crypto misuse) — separate from the quantum inventory
+-------------------------------------------------------------------------
+     The "Weaknesses" view lists insecure USE of cryptography found by the
+     misuse scanner: disabled TLS verification, hard-coded secrets, ECB mode,
+     JWT alg:none, weak DH groups, hand-rolled crypto, and so on — each with a
+     severity, a CWE id, the location, the code snippet, and a fix. These are
+     "you have a problem RIGHT NOW," independent of quantum.
+
+11.15 OUTPUTS
+------------
+     - cbom.json      CycloneDX 1.6 Cryptographic Bill of Materials. Includes
+                      cryptoProperties, a vulnerabilities array, a deterministic
+                      serial number, and namespaced `cryptonex:*` properties
+                      (detection confidence, criticality basis, etc.). Feeds
+                      into whatever platform the organisation adopts later.
+     - results.sarif  SARIF 2.1.0 — standard static-analysis format. Drop it
+                      into GitHub / GitLab CI to get pull-request annotations
+                      and a merge gate on new vulnerable assets in critical
+                      paths.
+     - result.json    the complete raw ScanResult for a SIEM / data lake.
+     - report.html    executive + audit report: posture grade, top risks, Mosca
+                      summary, per-critical-asset detail with the evidence-vs-
+                      assessment split, migration plan by wave. Converts to PDF
+                      if weasyprint is present.
+     CBOM output is DETERMINISTIC — same input, same bytes — so it can be
+     diffed in CI.
+
+11.16 THE WEB CONSOLE (local, offline) — 7 VIEWS
+----------------------------------------------
+     Launched with `cryptonex serve`. A dense, product-style dashboard
+     (deliberately NOT a flashy marketing page):
+        SCAN          point at a folder path OR upload a .zip; runs locally;
+                      download all four output formats.
+        OVERVIEW      the estate headline: posture grade, asset count,
+                      quantum-vulnerable count, HNDL, at-risk, weaknesses,
+                      crypto-agility, NQM 2028 wave, plus the top-12 highest-
+                      risk assets and status/criticality charts.
+        INVENTORY     the full asset table with filters (status, criticality,
+                      free-text search) and a detail pane per asset showing the
+                      Observed / Knowledge base / Inferred / Assumed split.
+        WEAKNESSES    the crypto-misuse findings, filterable by category, with
+                      per-finding detail and fix.
+        PQC READINESS crypto-agility index, the quantum-risk timeline chart,
+                      and the migration waves table.
+        MOSCA LAB     the three sliders + presets; live estate re-scoring.
+        COVERAGE      what was scanned, what was skipped, known limitations,
+                      tool + KB + config versions. (Honesty page.)
+
+11.17 OFFLINE / PRIVACY
+----------------------
+     Zero network calls. The scan runs on your machine. The cryptographic
+     inventory — a sensitive document — never leaves the building. The Docker
+     image runs as a non-root user. This is a hard requirement for defence,
+     power and government use and a key differentiator vs the cloud tools.
+
+
+--------------------------------------------------------------------------------
+12. WHAT WE DID NOT BUILD (and why that is fine)
+--------------------------------------------------------------------------------
+
+The PS lists "HSMs and cloud crypto services" among the things to scan. We did
+NOT build those two collectors, on purpose — the PS itself says to mark them as
+roadmap and avoid scope creep. They are documented in docs/ROADMAP_HSM_CLOUD.md
+with the exact approach:
+
+  - HSM collector: PKCS#11 interface via python-pkcs11, tested against SoftHSM2.
+    Would enumerate keys, mechanisms and their quantum status inside a hardware
+    security module.
+  - Cloud collector: read-only calls to AWS KMS / ACM, Azure Key Vault, GCP KMS
+    (using boto3 etc., mocked with `moto` for tests). Would inventory managed
+    keys, their algorithms and rotation state.
+
+Also "live network / TLS endpoint sweep" is roadmap (tools like SandboxAQ took
+years on this). Everything the PS calls the core — source, dependencies,
+certificates, container images, plus binaries as a bonus — is built and working.
+
+
+--------------------------------------------------------------------------------
+13. HOW IT COMPARES TO THE EXISTING TOOLS
+--------------------------------------------------------------------------------
+
+  IBM Guardium Quantum Safe    - mature; source + binary code scan + CBOM +
+                                 risk scoring. Enterprise contract (tens of
+                                 thousands USD+/yr). Delivered as a product /
+                                 cloud service. Covers code, not the whole
+                                 surface.
+
+  SandboxAQ AQ Analyzer        - excellent at NETWORK discovery. Complementary
+  (+ Cryptosense)                to code scanning, not a replacement. Cloud
+                                 service, expensive, picked by NIST NCCoE.
+
+  InfoSec Global AgileSec      - host agents + analytic server; discover, score,
+                                 prioritise. "Established but complex to deploy."
+
+  cbomkit (OSS, Linux Fdn)     - the only free comparable. Source code only.
+                                 3 languages (Java, Python, partial Go). Emits a
+                                 CBOM and a flat "quantum-safe" flag. NO
+                                 certificates, NO dependency manifests, NO
+                                 containers, NO Mosca prioritisation, NO
+                                 business-criticality, NO fix recommendations,
+                                 NO migration roadmap.
+
+  CRYPTONEX's one-sentence difference:
+     "Free, sovereign and offline, UNIFIED across source + dependencies +
+      certificates + container images + binaries, WITH Mosca-based
+      prioritisation, threat findings, a crypto-agility index, NQM-mapped
+      migration waves, and concrete PQC recommendations — which no free tool
+      does."
+
+
+--------------------------------------------------------------------------------
+14. HOW TO RUN IT
+--------------------------------------------------------------------------------
+
+  OPTION A — Docker (nothing to install but Docker)
+     git clone https://github.com/nivas1899/cryptonex
+     cd cryptonex
+     docker build -t cryptonex:local .
+     # scan a folder:
+     docker run --rm -v "$PWD/tests/fixtures/vulnerable-repo":/scan:ro \
+                cryptonex:local scan /scan --format cbom,json,report,sarif
+     # open the console:
+     docker run --rm -p 8713:8713 \
+                -v "$PWD/tests/fixtures/vulnerable-repo":/scan:ro \
+                cryptonex:local serve
+
+  OPTION B — from source (Python 3.12+)
+     git clone https://github.com/nivas1899/cryptonex
+     cd cryptonex
+     python -m venv .venv && . .venv/bin/activate
+     pip install -e ".[gui]"
+     cryptonex scan tests/fixtures/vulnerable-repo --out cryptonex-out
+     cryptonex serve
+
+  KEY COMMANDS
+     cryptonex scan <path>            run a scan
+        --format cbom,json,report,sarif   choose outputs
+        --crqc-year 2032                  set Mosca Z
+        --x 15  --y 3                     override Mosca X / Y
+        --scanners source,dependency     run a subset
+        --fail-on high                   non-zero exit for CI gates
+     cryptonex serve                  open the local web console
+     cryptonex kb                     show knowledge-base version + contents
+     cryptonex version
+
+
+--------------------------------------------------------------------------------
+15. THE 90-SECOND DEMO SCRIPT (follow ONE asset end to end)
+--------------------------------------------------------------------------------
+
+  Scan the fictional payments monorepo -> "46 assets, 25 weaknesses, posture B."
+  Then pick ONE asset: the RSA-4096 root CA at pki/root-ca/root-ca.crt.
+
+  1. DISCOVER   "It appears in the inventory — an RSA-4096 signing key, the
+                 offline root of trust for the whole PKI."
+  2. EVIDENCE   Open Asset Detail -> OBSERVED: certificate collector, confidence
+                 CONFIRMED, the real key size and CA flag. "An observed fact,
+                 not a guess."
+  3. STATUS     KNOWLEDGE BASE: "VULNERABLE — Shor's algorithm recovers the
+                 private key by factoring the modulus. RSA of any size falls."
+  4. ASSESS     INFERRED: criticality critical — pki(+22), root-ca(+15),
+                 external(+30), ca-key(+15). "A heuristic from path/config
+                 signals. We label it as inferred."
+  5. MOSCA      ASSUMED: X 20y + Y 5y = 25 vs Z(2032) - now = 6 -> exposed ~19y.
+                 "Configurable assumptions, a transparent scenario, not a
+                 prediction."
+  6. RECOMMEND  Card: SLH-DSA-SHA2-192s, effort architectural, "parallel PQC
+                 root, cross-sign." "The most conservative case gets the
+                 hash-based algorithm."
+  7. PLAN       PQC Readiness -> Migration waves: this asset is Wave 4,
+                 NQM phase high-priority-2028. "Now it's an executive decision,
+                 sequenced against the national roadmap."
+
+  That thread — Code -> Evidence -> Status -> Assessment -> Mosca ->
+  Recommendation -> Wave -> Decision — is the whole product in 90 seconds.
+  THEN show the estate views and the CBOM / SARIF export.
+
+  DO NOT open with line counts, "42 families", "162 rules", "39 tests". Those
+  are evidence you bring out WHEN ASKED.
+
+
+--------------------------------------------------------------------------------
+16. JUDGE QUESTIONS & HONEST ANSWERS
+--------------------------------------------------------------------------------
+
+Q: "Do quantum computers even exist?"
+A: Small noisy ones do (IBM, Google — a few hundred qubits). Breaking RSA-2048
+   needs millions of good qubits; estimates say early-to-mid 2030s. But because
+   of harvest-now-decrypt-later, and because migration takes years, it is a
+   TODAY problem regardless of the exact date.
+
+Q: "Isn't this just an antivirus / SBOM tool?"
+A: An SBOM lists software packages. A CBOM lists cryptographic assets
+   specifically — algorithms, key sizes, certificates, protocols. And we go
+   further than a list: quantum risk scoring, Mosca with your business context,
+   and the specific replacement algorithm.
+
+Q: "Doesn't IBM already make this?"
+A: IBM and SandboxAQ do — ~$100k+/yr enterprise contracts, delivered as foreign
+   cloud services. You cannot send a defence cryptographic inventory to a
+   foreign SaaS. Each covers only part of the surface (IBM code, SandboxAQ
+   network). The one free tool, cbomkit, does 3 languages of source code and
+   stops at a flat list. CRYPTONEX is free, offline, unified and actionable.
+
+Q: "How do I know your scanner isn't full of false positives?"
+A: Two answers. One — every finding carries a stated detection confidence and
+   its evidence (file, line, snippet), verifiable in seconds. Two — we
+   benchmarked against 7 real open-source projects (PyJWT, paramiko,
+   python-jose, pyca/cryptography, golang-jwt, node-jsonwebtoken, itsdangerous);
+   docs/benchmark has the results and a precision spot-check sheet. Scans run in
+   under 6 seconds, and we separate production findings from test-fixture ones.
+
+Q: "How do you know this crypto actually protects sensitive data?"
+A: We don't claim to. CRYPTONEX separates OBSERVED evidence from INFERRED risk.
+   The algorithm, parameters and location are observed. Business criticality,
+   data classification and external exposure are heuristic inferences from path
+   and config signals — labelled as such, with the reasoning shown. They are a
+   prioritisation starting point for a human, not organisational truth.
+
+Q: "Why 2032? Who decides X, Y, Z?"
+A: Nobody in the tool. X, Y and Z are configurable. The Mosca Lab ships
+   NIST-baseline, optimistic and EU-2030-regulator presets and lets an
+   organisation model their own. We don't predict a date; we run a transparent
+   scenario and re-score the estate live.
+
+Q: "What's the 'AI' in it?"
+A: Pattern-recognition scanning that can flag crypto usage it hasn't seen an
+   exact rule for, and the analysis engine that reasons from an asset's risk
+   profile to a prioritised recommendation. Plus an optional local model to
+   explain each finding in plain English. The core value is deterministic and
+   auditable — which is what you want in a compliance tool.
+
+Q: "Can you really scan every language / every system?"
+A: The prototype covers source in 12 languages, dependency manifests in 9
+   ecosystems, certificate and key files, container images, and binaries —
+   already broader than the free alternative. Live network sweeps and
+   hardware-module integration are roadmap; those took the commercial vendors
+   years.
+
+Q: "Does Grover's algorithm break AES?"
+A: No. It gives a quadratic speedup on brute force — effectively halves the key
+   strength. AES-128 -> ~64-bit effective, so move to AES-256, which stays
+   safe. Same idea for hashes: use SHA-384/512.
+
+
+--------------------------------------------------------------------------------
+17. GLOSSARY — every term, one line
+--------------------------------------------------------------------------------
+
+  AES               Advanced Encryption Standard. The standard symmetric cipher.
+                    AES-256 is quantum-safe; AES-128 is "weakened."
+  Asymmetric crypto See "public-key crypto."
+  BFSI              Banking, Financial Services and Insurance (a regulated sector).
+  Binary            A compiled program or library (not source code).
+  CA                Certificate Authority — an entity whose key signs other
+                    certificates. A "root CA" is the top of the trust chain.
+  CBOM              Cryptographic Bill of Materials — a structured inventory of
+                    all cryptography in a system. Standard format: CycloneDX CBOM.
+  CI / CD           Continuous Integration / Delivery — automated build+test
+                    pipelines. SARIF output plugs into these.
+  CRQC              Cryptographically-Relevant Quantum Computer — one big enough
+                    to break RSA-2048. Does not exist yet.
+  Crypto-agility    The ability to change algorithm without rebuilding the system.
+  CVE               Common Vulnerabilities and Exposures — a public ID for a
+                    known security flaw (e.g. CVE-2022-xxxxx).
+  CWE               Common Weakness Enumeration — a category ID for a TYPE of
+                    flaw (e.g. CWE-327 "broken crypto algorithm").
+  CycloneDX         An open standard for bills of materials; has a CBOM profile.
+  DH / Diffie-Hellman  A key-exchange algorithm. Quantum-vulnerable.
+  DSA / ECDSA       Digital Signature Algorithm / its elliptic-curve version.
+                    Quantum-vulnerable.
+  ECC               Elliptic Curve Cryptography — compact public-key crypto used
+                    everywhere (e.g. Ed25519, P-256). Quantum-vulnerable.
+  ECB mode          A weak way of using a block cipher — identical input blocks
+                    give identical output blocks. A misuse finding.
+  FIPS 203/204/205  The three finalised NIST PQC standards (ML-KEM, ML-DSA,
+                    SLH-DSA).
+  Grover's algorithm  A quantum algorithm that speeds up brute-force search;
+                    halves symmetric-key strength. Fix: bigger keys.
+  Hash function     Makes a fixed-size fingerprint of data (e.g. SHA-256).
+                    MD5 and SHA-1 are broken.
+  HNDL              Harvest Now, Decrypt Later — record encrypted data today,
+                    decrypt it after a quantum computer arrives.
+  HSM               Hardware Security Module — a tamper-resistant box that stores
+                    keys and does crypto operations. (Collector is roadmap.)
+  Hybrid crypto     Running a classical + a PQC algorithm together during the
+                    transition, so you're safe if either is later broken.
+  IV                Initialisation Vector — a per-message random value a cipher
+                    needs. A static or zero IV is a misuse finding.
+  JWT               JSON Web Token — a signed token used for logins/APIs.
+                    "alg: none" disables the signature — a critical misuse.
+  KEM               Key Encapsulation Mechanism — the modern name for a
+                    key-exchange primitive. ML-KEM is the PQC KEM.
+  Key exchange      Two parties agree on a shared secret over an open channel.
+  Knowledge base    CRYPTONEX's versioned YAML files holding all crypto facts.
+  Lattice crypto    The maths family most PQC algorithms are built on; believed
+                    hard for quantum computers.
+  lief              A Python library for parsing binaries (ELF/PE/Mach-O).
+  ML-DSA            "Module-Lattice Digital Signature Algorithm" (was Dilithium).
+                    FIPS 204. Replaces RSA/ECDSA signatures.
+  ML-KEM            "Module-Lattice Key Encapsulation Mechanism" (was Kyber).
+                    FIPS 203. Replaces RSA/ECDH key exchange.
+  Mosca's inequality  X (secrecy lifetime) + Y (migration time) > Z (years to a
+                    quantum computer) => the data is already at risk.
+  NIST              US National Institute of Standards and Technology — runs the
+                    PQC standardisation.
+  NQM               National Quantum Mission (India). Mandates crypto inventories
+                    for critical sectors by Dec 2027.
+  NTRO              National Technical Research Organisation — the PS 26164 org.
+  OCI image         The standard format for a container image (what Docker
+                    builds).
+  PII / PCI         Personally Identifiable Information / Payment Card Industry
+                    data — data-classification labels CRYPTONEX infers.
+  PKI               Public Key Infrastructure — the system of CAs and
+                    certificates that underpins trust on the internet.
+  Post-quantum / PQC  Cryptography designed to resist quantum computers.
+  Posture score     CRYPTONEX's 0-100 estate headline, graded A-F.
+  Primitive         The category of a crypto operation: signature, KEM,
+                    key-agreement, public-key-encryption, block-cipher, hash...
+  Private key       The secret half of a key pair. Must never leak.
+  Public-key crypto  Crypto with a public + private key pair. RSA, ECC, DH.
+                    This is the family the quantum threat breaks.
+  Quantum computer  A machine using quantum physics; can run Shor's / Grover's.
+  RSA               The classic public-key algorithm (named after its inventors).
+                    Security = "factoring is hard." Quantum-vulnerable.
+  SARIF             Static Analysis Results Interchange Format — a standard JSON
+                    format for code-scan results; CI systems understand it.
+  SBOM              Software Bill of Materials — inventory of software packages
+                    (the non-crypto cousin of a CBOM).
+  Shor's algorithm  The 1994 quantum algorithm that breaks RSA, ECC, DH, DSA,
+                    ECDSA on a large enough quantum computer.
+  SLH-DSA           "Stateless Hash-based DSA" (was SPHINCS+). FIPS 205. A
+                    conservative signature scheme for long-lived roots of trust.
+  Static analysis   Examining code/artefacts WITHOUT running them. What the
+                    scanners do.
+  Symmetric crypto  One shared secret key. AES, hashes. Only "weakened" by
+                    quantum, not broken.
+  TLS               Transport Layer Security — the "S" in HTTPS.
+  X.509             The standard format for a digital certificate.
+  YAML              A human-readable data file format. CRYPTONEX's knowledge
+                    base is YAML.
+
+
+--------------------------------------------------------------------------------
+18. THE NUMBERS (for when you're asked)
+--------------------------------------------------------------------------------
+
+  Knowledge base version        2026.02
+  Algorithm families            42
+  Algorithm aliases             108
+  Crypto libraries known        80
+  Source detection rules        162, across 12 languages
+  Dependency ecosystems         9
+  Threat / misuse rules         28
+  Crypto-constant fingerprints  28  (hand-rolled-crypto detection)
+  Library advisories            13  (CVE / RUSTSEC / GHSA)
+  PQC recommendation rules      9
+  Scanners                      6   (source, dependency, certificate, misuse,
+                                     container, binary)
+  Output formats                4   (CycloneDX CBOM, SARIF, JSON, HTML/PDF)
+  Console views                 7
+  Automated tests               39, all passing
+  Benchmark corpus              7 real open-source repositories
+  External network calls        0   (fully offline)
+  Cost to run                   0   (free, Apache-2.0)
+
+  Demo scan result (fictional payments monorepo):
+     46 cryptographic assets · 25 weaknesses · posture grade B (79/100)
+     scan time: under 6 seconds
+
+
+================================================================================
+  Repository:  https://github.com/nivas1899/cryptonex
+  License:     Apache-2.0
+  Standards:   CycloneDX CBOM 1.6 · SARIF 2.1.0 · NIST FIPS 203/204/205
+================================================================================
