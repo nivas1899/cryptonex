@@ -136,8 +136,23 @@ def serve(
 ):
     """Open the local web console. Scan a codebase from the browser, or load an existing result."""
     gui = Path(__file__).parent / "gui" / "streamlit_app.py"
+    # Theme is passed explicitly so the console looks the same from any working
+    # directory (a bare `.streamlit/config.toml` is only picked up from the CWD).
+    theme = [
+        "--theme.base", "light",
+        "--theme.primaryColor", "#1f5fbf",
+        "--theme.backgroundColor", "#f5f6f7",
+        "--theme.secondaryBackgroundColor", "#eceef0",
+        "--theme.textColor", "#191d21",
+        "--theme.linkColor", "#1f5fbf",
+        "--theme.borderColor", "#e2e5e8",
+        "--theme.baseRadius", "small",
+        "--theme.showWidgetBorder", "true",
+        "--client.toolbarMode", "minimal",
+        "--browser.gatherUsageStats", "false",
+    ]
     args = [sys.executable, "-m", "streamlit", "run", str(gui),
-            "--server.port", str(port), "--server.headless", "true"]
+            "--server.port", str(port), "--server.headless", "true", *theme]
     if result.exists():
         args += ["--", str(result.resolve())]
     else:

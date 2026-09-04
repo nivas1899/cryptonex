@@ -46,7 +46,8 @@ def _store(result: ScanResult) -> None:
 
 
 # ---------------- sidebar ----------------
-st.sidebar.title("🔐 CRYPTONEX")
+st.sidebar.title("CRYPTONEX")
+st.sidebar.caption("cryptographic posture console")
 result = _get_result()
 if result:
     st.sidebar.caption(f"scan of `{Path(result.target).name}`  ·  {result.posture.total_assets} assets")
@@ -87,7 +88,7 @@ if view == "Scan":
     st.subheader("Scan a codebase")
     st.caption("CRYPTONEX reads a folder of source. Nothing leaves this machine — the scan runs here.")
 
-    tab_path, tab_zip = st.tabs(["📁  Local folder", "🗜️  Upload a .zip"])
+    tab_path, tab_zip = st.tabs(["Local folder", "Upload .zip"])
 
     with tab_path:
         p = st.text_input("Path to the codebase", value="tests/fixtures/vulnerable-repo",
@@ -148,7 +149,7 @@ if view == "Overview":
     p = result.posture
     st.subheader("Estate posture")
     c = st.columns(5)
-    c[0].metric("Posture", p.grade, f"{p.posture_score:.0f}/100")
+    c[0].metric("Posture", p.grade, f"{p.posture_score:.0f}/100", delta_color="off")
     c[1].metric("Assets", p.total_assets)
     c[2].metric("Quantum-vulnerable", p.by_status.get("vulnerable", 0))
     c[3].metric("HNDL exposed", p.hndl_count)
@@ -157,7 +158,7 @@ if view == "Overview":
     c2 = st.columns(5)
     c2[0].metric("Weaknesses", len(result.findings), f"{crit_hi} critical/high", delta_color="inverse")
     c2[1].metric("Crypto-agility", f"{result.pqc_readiness.crypto_agility_index:.0f}",
-                 result.pqc_readiness.agility_grade)
+                 result.pqc_readiness.agility_grade, delta_color="off")
     c2[2].metric("NQM 2028 wave", result.pqc_readiness.nqm_phase_counts.get("high-priority-2028", 0))
     c2[3].metric("HNDL at rest", result.pqc_readiness.hndl_at_rest_count)
     c2[4].metric("Already safe", p.by_status.get("safe", 0))
@@ -202,18 +203,18 @@ elif view == "Inventory":
         with d1:
             st.markdown(f"### {a.name}")
             st.markdown(status_badge(a.quantum_status.value), unsafe_allow_html=True)
-            st.markdown("**🔎 Observed** — evidence-backed")
+            st.markdown("**Observed** — evidence-backed")
             for e in a.assessment.observed:
                 st.caption("· " + e)
             st.code("\n".join(e.snippet or "" for e in a.detection.evidence) or "—")
-            st.markdown("**📚 Knowledge base** — deterministic, cited")
+            st.markdown("**Knowledge base** — deterministic, cited")
             for e in a.assessment.kb_derived:
                 st.caption("· " + e)
         with d2:
-            st.markdown("**🧮 Inferred** — heuristic, review before acting")
+            st.markdown("**Inferred** — heuristic, review before acting")
             for e in a.assessment.inferred:
                 st.caption("· " + e)
-            st.markdown("**⚙️ Assumed** — operator-set")
+            st.markdown("**Assumed** — operator-set")
             for e in a.assessment.assumed:
                 st.caption("· " + e)
             if a.mosca_result and a.quantum_status.value != "safe":
@@ -238,9 +239,10 @@ elif view == "Weaknesses":
         cats = sorted({f.category for f in result.findings})
         pick = st.multiselect("Category", cats)
         items = [f for f in result.findings if not pick or f.category in pick]
-        sev_color = {"critical": "🔴", "medium": "🟡", "high": "🟠", "low": "⚪", "info": "⚫"}
+        sev_rank = {"critical": 0, "high": 1, "medium": 2, "low": 3, "info": 4}
+        items = sorted(items, key=lambda f: (sev_rank.get(f.severity.value, 9), f.location))
         df = pd.DataFrame([{
-            "severity": sev_color.get(f.severity.value, "") + " " + f.severity.value,
+            "severity": f.severity.value.upper(),
             "finding": f.title, "category": f.category, "cwe": f.cwe or "",
             "location": f.location,
         } for f in items])
@@ -261,7 +263,7 @@ elif view == "PQC Readiness":
     rd = result.pqc_readiness
     st.subheader("Post-quantum readiness")
     m = st.columns(4)
-    m[0].metric("Crypto-agility index", f"{rd.crypto_agility_index:.0f}/100", rd.agility_grade)
+    m[0].metric("Crypto-agility index", f"{rd.crypto_agility_index:.0f}/100", rd.agility_grade, delta_color="off")
     m[1].metric("High-priority (NQM 2028)", rd.nqm_phase_counts.get("high-priority-2028", 0))
     m[2].metric("Full adoption (NQM 2029)", rd.nqm_phase_counts.get("full-adoption-2029", 0))
     m[3].metric("Already quantum-safe", rd.nqm_phase_counts.get("no-action", 0))

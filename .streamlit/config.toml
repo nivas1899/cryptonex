@@ -1,0 +1,27 @@
+# CRYPTONEX console theme — matches cryptonex_console.html.
+# Muted, dense, product-like: off-white ground, one blue accent, tight radii.
+
+[theme]
+base = "light"
+primaryColor = "#1f5fbf"
+backgroundColor = "#f5f6f7"
+secondaryBackgroundColor = "#eceef0"
+textColor = "#191d21"
+linkColor = "#1f5fbf"
+borderColor = "#e2e5e8"
+showWidgetBorder = true
+baseRadius = "small"
+font = "sans-serif"
+codeFont = "monospace"
+baseFontSize = 14
+
+[theme.sidebar]
+backgroundColor = "#ffffff"
+secondaryBackgroundColor = "#f5f6f7"
+borderColor = "#e2e5e8"
+
+[client]
+toolbarMode = "minimal"
+
+[browser]
+gatherUsageStats = false
