@@ -98,21 +98,20 @@ def _print_summary(result) -> None:
 
 @app.command()
 def serve(
-    result: Path = typer.Option("ecdat-out/result.json", "--result", help="Scan result JSON to load"),
+    result: Path = typer.Option("ecdat-out/result.json", "--result",
+                                help="Scan result JSON to load (optional — the console can scan directly)"),
     port: int = typer.Option(8713, "--port"),
 ):
-    """Open the local web console (Streamlit) on a scan result."""
-    if not result.exists():
-        console.print(f"[red]no scan result at {result}[/] — run `ecdat scan` first.")
-        raise typer.Exit(1)
+    """Open the local web console. Scan a codebase from the browser, or load an existing result."""
     gui = Path(__file__).parent / "gui" / "streamlit_app.py"
-    env_result = str(result.resolve())
+    args = [sys.executable, "-m", "streamlit", "run", str(gui),
+            "--server.port", str(port), "--server.headless", "true"]
+    if result.exists():
+        args += ["--", str(result.resolve())]
+    else:
+        console.print("[dim]no scan result loaded — the console will open on the Scan page[/]")
     console.print(f"[bold]ECDAT console[/] → http://localhost:{port}")
-    subprocess.run(
-        [sys.executable, "-m", "streamlit", "run", str(gui),
-         "--server.port", str(port), "--server.headless", "true", "--", env_result],
-        check=False,
-    )
+    subprocess.run(args, check=False)
 
 
 @app.command("kb")
