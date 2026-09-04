@@ -33,7 +33,27 @@ st.markdown("""
   h2, [data-testid="stHeadingWithActionElements"] h2 { font-size: 1.45rem; }
   h3 { font-size: 1.1rem; }
   [data-testid="stDataFrame"] { font-size: .92rem; }
-  .stRadio label p { font-size: .95rem; }
+
+  /* Sidebar navigation — render the view picker as a plain nav list,
+     not radio buttons: drop the dial, add hover + a selected accent bar. */
+  section[data-testid="stSidebar"] div[data-testid="stRadioGroup"] { gap: 1px; }
+  section[data-testid="stSidebar"] label[data-testid="stRadioOption"] {
+    width: 100%; padding: 7px 10px; border-radius: 6px; margin: 0;
+  }
+  section[data-testid="stSidebar"] label[data-testid="stRadioOption"] > div > div > div:first-child {
+    display: none;  /* the radio dial */
+  }
+  section[data-testid="stSidebar"] label[data-testid="stRadioOption"] p {
+    font-size: .95rem; color: #586069;
+  }
+  section[data-testid="stSidebar"] label[data-testid="stRadioOption"]:hover { background: #eceef0; }
+  section[data-testid="stSidebar"] label[data-testid="stRadioOption"]:hover p { color: #191d21; }
+  section[data-testid="stSidebar"] label[data-testid="stRadioOption"][data-selected="true"] {
+    background: #1f5fbf14; box-shadow: inset 2px 0 0 #1f5fbf;
+  }
+  section[data-testid="stSidebar"] label[data-testid="stRadioOption"][data-selected="true"] p {
+    color: #1f5fbf; font-weight: 600;
+  }
 </style>
 """, unsafe_allow_html=True)
 
