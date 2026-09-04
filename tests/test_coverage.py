@@ -65,3 +65,26 @@ def test_ssh_config_weaknesses(result):
 def test_no_finding_on_safe_go_aes(result):
     # services/vault/crypto.go uses AES-256-GCM — no misuse finding there
     assert not any("vault/crypto.go" in f.location for f in result.findings)
+
+
+def test_container_image_scanned(result):
+    # deploy/payments-api-image.tar is a docker-save tar with planted crypto
+    img_locs = [
+        loc.component for a in result.assets for loc in a.locations
+        if ".tar!" in loc.component
+    ]
+    assert any("crypto.py" in x for x in img_locs), "no crypto found inside the container image"
+    assert any("libpayments.so" in x for x in img_locs), "binary inside the image not scanned"
+    img_findings = [f for f in result.findings if ".tar!" in f.location]
+    assert any(f.rule_id == "misuse.tls.verify_off.py" for f in img_findings)
+    assert any(f.rule_id == "container.env-secret" for f in img_findings)
+
+
+def test_container_scan_direct():
+    from ecdat.core.orchestrator import run_scan
+    img = Path(__file__).parent / "fixtures" / "payments-api-image.tar"
+    r = run_scan(str(img), crqc_year=2032, now_year=2026)
+    assert r.assets and all(".tar!" in loc.component
+                            for a in r.assets for loc in a.locations)
+    fams = {a.algorithm_family for a in r.assets}
+    assert {"MD5", "RSA", "ECC"} <= fams

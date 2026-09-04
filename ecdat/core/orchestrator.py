@@ -94,7 +94,9 @@ def run_scan(
     limitations = ["detection uses regex + constant fingerprints, not full AST parsing"]
     if "binary" not in run_names:
         limitations.append("binary collector not run (install `lief`, or --scanners includes binary)")
-    limitations.append("container-image and live-TLS collectors: roadmap")
+    if "container" not in run_names:
+        limitations.append("container collector not run")
+    limitations.append("live-network/TLS, cloud-KMS and HSM/PKCS#11 collectors: roadmap (M2)")
 
     coverage = CoverageStatement(
         scanners_run=run_names,

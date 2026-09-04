@@ -11,6 +11,7 @@ discovery tools.
 | **dependency** | pip, npm, Maven/Gradle, Go modules, **Cargo**, **NuGet / .csproj**, **RubyGems**, **Composer**, **CocoaPods** — **80 catalogued crypto libraries** with EOL / advisory flags, + **14 CVE / RUSTSEC / GHSA advisories** matched by version range | `packaging` + offline advisory snapshot |
 | **certificate** | X.509 (PEM/DER/PKCS7), public & private keys — key material never read, only a SHA-256(SPKI) fingerprint | `cryptography` |
 | **binary** | ELF / PE / Mach-O — linked libcrypto/libssl/mbedTLS/wolfSSL/liboqs, crypto symbols, version banners, embedded PEM/OIDs | **`lief`** |
+| **container** | Docker-`save` tar / `.tar.gz` / OCI layout — unpacks layers (honours whiteouts), runs source+dependency+certificate+binary+misuse over the merged rootfs, flags secret-looking image `ENV` | stdlib `tarfile` |
 | **hand-rolled crypto** | **28 constant fingerprints** — AES S-box/Rcon, SHA-256/512/1/3 constants, MD5 T-table, Blowfish P-array, DES/GOST/SM4 S-boxes, Twofish/Serpent constants, NIST P-256 / secp256k1 / Curve25519 primes, ChaCha20 sigma, Poly1305 clamp, bcrypt magic, BLAKE2b IV | own detector |
 
 ## Threat finders — cryptographic misuse (28 rules → SARIF + CBOM vulnerabilities)
@@ -59,6 +60,7 @@ Every finding carries a CWE, a plain-language description, and a concrete fix.
 | Dependency discovery | ✅ 5 ecosystems | ✅ | – | – |
 | Certificate / key discovery | ✅ | ✅ | ✅ | – |
 | Binary discovery | ✅ (lief) | ✅ | – | – |
+| Container-image discovery | ✅ (offline, layer-merge) | ✅ | – | ✅ (theia) |
 | Hand-rolled-crypto detection | ✅ constant fingerprints | ✅ | – | – |
 | **Crypto-misuse / threat finders** | ✅ 21 rules, CWE-mapped | partial | – | – |
 | Quantum risk + Mosca | ✅ | ✅ | ✅ | flag only |
