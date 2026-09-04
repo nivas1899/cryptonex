@@ -27,7 +27,7 @@ Open `http://localhost:8713` → lands on the **Scan** page.
 > "CRYPTONEX runs locally. Point it at a folder, or — for this demo — drop a zip of the repo."
 
 Go to the **Upload a .zip** tab → drop `demo-repo.zip`.
-`![](demo/demo-02-zip-uploaded.png)`
+_(drop the zip → Run scan)_
 
 Click **Run scan**.
 
@@ -60,13 +60,13 @@ Pick **`RSA · pki/root-ca/root-ca.crt`** in *Inspect asset*:
 ### 4 · Mosca Lab — stress-test the assumptions
 
 Sidebar → **Mosca Lab**.
-`![](demo/demo-05-mosca.png)`
+_(Mosca Lab: three sliders + presets)_
 
 > "This is the analyst tool. Three assumptions: how long your data must stay secret,
 > how long migration takes, when a quantum computer arrives."
 
 Click the **Regulator (EU 2030)** preset (X=15, Y=4, Z=2030):
-`![](demo/demo-06-mosca-regulator.png)`
+_(pick the "Regulator (EU 2030)" preset — the at-risk table and posture recompute live)_
 
 > "`X + Y = 19` vs `Z − now = 4`. Under a regulator's assumptions the posture drops and
 > **17 of 28** assets are at risk — the root CA's exposure jumps to ~89. Everything
@@ -75,7 +75,7 @@ Click the **Regulator (EU 2030)** preset (X=15, Y=4, Z=2030):
 ### 5 · Deliverables
 
 Sidebar → **Scan** → download buttons.
-`![](demo/demo-07-downloads.png)`
+_(Scan page → download cbom.json / result.json / report.html / results.sarif)_
 
 - **`cbom.json`** — CycloneDX 1.6 Cryptographic Bill of Materials (28 components, evidence,
   dependency graph, `cryptonex:` risk properties). "This is the interchange format — feeds a
