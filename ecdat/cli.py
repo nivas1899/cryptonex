@@ -145,13 +145,19 @@ def serve(
 @app.command("kb")
 def kb_info():
     """Show Knowledge Base version and contents."""
+    from ecdat.scanners.registry import available_scanners
+
     kb = get_kb()
-    console.print(f"kb version: [cyan]{kb.version}[/]")
-    console.print(f"algorithm families: {len(kb.algorithms['families'])}")
-    console.print(f"aliases: {len(kb.aliases.get('aliases', {}))}")
-    console.print(f"libraries: {len(kb.libraries.get('libraries', []))}")
-    console.print(f"pqc rules: {len(kb.pqc_rules())}")
-    console.print(f"source rule sets: {sum(len(v) for v in kb.rules_by_ext.values())} compiled rules")
+    uniq_rules = len({r.id for rs in kb.rules_by_ext.values() for r in rs})
+    console.print(f"kb version:          [cyan]{kb.version}[/]")
+    console.print(f"algorithm families:  {len(kb.algorithms['families'])}")
+    console.print(f"aliases:             {len(kb.aliases.get('aliases', {}))}")
+    console.print(f"libraries:           {len(kb.libraries.get('libraries', []))}")
+    console.print(f"pqc recommendation:  {len(kb.pqc_rules())} rules")
+    console.print(f"crypto detection:    {uniq_rules} source rules")
+    console.print(f"threat / misuse:     {len(kb.misuse_rules)} rules")
+    console.print(f"crypto constants:    {len(kb.constants)} fingerprints")
+    console.print(f"scanners:            {', '.join(available_scanners())}")
 
 
 @app.command()

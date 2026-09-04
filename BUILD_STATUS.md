@@ -1,6 +1,21 @@
-# ECDAT — Build Status (M0)
+# ECDAT — Build Status
 
-**Working end-to-end.** `~2,000 LOC` Python + a versioned YAML Knowledge Base. 21 tests pass.
+**Working end-to-end.** ~3,000 LOC Python + a versioned YAML Knowledge Base. **30 tests pass.**
+Verified on the Docker image (`ecdat:local`).
+
+See `docs/CAPABILITIES.md` for the full capability list and the comparison vs. IBM / SandboxAQ.
+
+## New since M0
+
+- **Threat finders** — a `misuse` scanner with **21 CWE-mapped rules**: disabled TLS verification
+  (critical), ECB mode, static/zero IV, hardcoded keys, weak RNG, RSA<2048, JWT alg-confusion, …
+- **Hand-rolled-crypto detection** — 17 constant fingerprints (AES S-box, SHA/MD5 tables, curve primes).
+- **Binary scanner** — ELF/PE/Mach-O via `lief` (linked libs, crypto symbols, version banners).
+- **PQC-readiness analytics** — crypto-agility index, migration waves, **India NQM phase mapping**,
+  quantum-risk timeline.
+- **SARIF 2.1.0 export** + CBOM `vulnerabilities` array + `--fail-on` now covers findings.
+- **Knowledge base doubled** — 42 algorithm families (was 26), 39 libraries (was 16), 63 detection rules.
+- **Console** — new **Weaknesses** and **PQC Readiness** views.
 
 ## What runs today
 
