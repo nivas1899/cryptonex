@@ -211,7 +211,9 @@ elif view == "Inventory":
 # ================= MOSCA LAB =================
 elif view == "Mosca Lab":
     st.subheader("Mosca Lab")
-    st.caption("If X + Y > Z − now, the data is already exposed to harvest-now-decrypt-later.")
+    st.caption("If X + Y > Z − now, the data is already exposed to harvest-now-decrypt-later. "
+               "These sliders apply a **uniform** X and Y to every asset — a stress test. "
+               "The Overview uses each asset's own data classification instead.")
     preset = st.radio("Preset", ["NIST baseline", "Optimistic", "Regulator (EU 2030)"], horizontal=True)
     dfl = {"NIST baseline": (10, 3, 2032), "Optimistic": (7, 2, 2035),
            "Regulator (EU 2030)": (15, 4, 2030)}[preset]
