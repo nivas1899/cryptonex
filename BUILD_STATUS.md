@@ -1,21 +1,35 @@
 # ECDAT — Build Status
 
-**Working end-to-end.** ~3,000 LOC Python + a versioned YAML Knowledge Base. **30 tests pass.**
+**Working end-to-end.** ~3,500 LOC Python + a versioned YAML Knowledge Base. **37 tests pass.**
 Verified on the Docker image (`ecdat:local`).
 
 See `docs/CAPABILITIES.md` for the full capability list and the comparison vs. IBM / SandboxAQ.
 
-## New since M0
+## Knowledge base
 
-- **Threat finders** — a `misuse` scanner with **21 CWE-mapped rules**: disabled TLS verification
-  (critical), ECB mode, static/zero IV, hardcoded keys, weak RNG, RSA<2048, JWT alg-confusion, …
-- **Hand-rolled-crypto detection** — 17 constant fingerprints (AES S-box, SHA/MD5 tables, curve primes).
-- **Binary scanner** — ELF/PE/Mach-O via `lief` (linked libs, crypto symbols, version banners).
+| | count |
+|---|---|
+| Algorithm families | **42** (RSA…SM4, XMSS/LMS, ML-KEM/ML-DSA/SLH-DSA) |
+| Aliases | 108 |
+| Source detection rules | **162** across **13 languages** (Python, Java, JS/TS, C#, Rust, PHP, Ruby, Swift, Go, C/C++, config, shell) |
+| Dependency ecosystems | **6** — pip, npm, Maven/Gradle, Go, Cargo, NuGet, RubyGems, Composer, CocoaPods |
+| Catalogued crypto libraries | **80** with EOL / advisory flags |
+| Library CVE / RUSTSEC / GHSA advisories | **13** matched by version range |
+| Misuse / threat rules | **28** CWE-mapped |
+| Crypto-constant fingerprints | **28** |
+| PQC recommendation rules | 9 |
+
+## Since M0
+
+- **Threat finders** — `misuse` scanner (28 rules): disabled TLS verification, ECB, static IV,
+  hardcoded keys, weak RNG, RSA<2048, JWT alg-confusion, legacy TLS/SSH config, non-constant-time
+  MAC compare, fixed ECDSA nonce, vulnerable-dependency advisories, …
+- **Hand-rolled-crypto detection** — 28 constant fingerprints
+- **Binary scanner** — ELF/PE/Mach-O via `lief`
 - **PQC-readiness analytics** — crypto-agility index, migration waves, **India NQM phase mapping**,
-  quantum-risk timeline.
-- **SARIF 2.1.0 export** + CBOM `vulnerabilities` array + `--fail-on` now covers findings.
-- **Knowledge base doubled** — 42 algorithm families (was 26), 39 libraries (was 16), 63 detection rules.
-- **Console** — new **Weaknesses** and **PQC Readiness** views.
+  quantum-risk timeline
+- **SARIF 2.1.0** + CBOM `vulnerabilities` array + `--fail-on` covers findings
+- **Console** — **Weaknesses** and **PQC Readiness** views
 
 ## What runs today
 
