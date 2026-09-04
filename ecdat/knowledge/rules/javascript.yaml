@@ -1,0 +1,40 @@
+language: javascript
+extensions: [".js", ".mjs", ".cjs", ".ts", ".jsx", ".tsx"]
+rules:
+  - id: js.createhash
+    regex: "createHash\\(\\s*['\"](?P<algo>[A-Za-z0-9-]+)['\"]"
+    raw_name: "{algo}"
+    confidence: high
+  - id: js.createhmac
+    regex: "createHmac\\(\\s*['\"](?P<algo>[A-Za-z0-9-]+)['\"]"
+    raw_name: "hmac-{algo}"
+    primitive: mac
+    confidence: high
+  - id: js.cipheriv
+    regex: "createCipheriv\\(\\s*['\"](?P<algo>[A-Za-z0-9-]+)['\"]"
+    raw_name: "{algo}"
+    confidence: high
+  - id: js.sign
+    regex: "createSign\\(\\s*['\"](?P<algo>[A-Za-z0-9-]+)['\"]"
+    raw_name: "{algo}"
+    primitive: signature
+    confidence: medium
+  - id: js.jwt
+    regex: "(?:sign|verify)\\([^)]*?algorithm[s]?\\s*:\\s*\\[?\\s*['\"](?P<algo>[A-Za-z0-9]+)['\"]"
+    raw_name: "{algo}"
+    primitive: signature
+    confidence: high
+  - id: js.generatekeypair
+    regex: "generateKeyPair(?:Sync)?\\(\\s*['\"](?P<algo>[A-Za-z0-9]+)['\"]"
+    raw_name: "{algo}"
+    confidence: high
+  - id: js.pbkdf2
+    regex: "pbkdf2(?:Sync)?\\([^)]*['\"](?P<hash>sha1|sha256|sha512)['\"]"
+    raw_name: "pbkdf2-hmac-{hash}"
+    primitive: kdf
+    confidence: medium
+  - id: js.bcrypt
+    regex: "bcrypt\\.(hash|genSalt|hashSync)\\("
+    raw_name: bcrypt
+    primitive: kdf
+    confidence: high

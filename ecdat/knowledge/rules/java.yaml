@@ -1,0 +1,43 @@
+language: java
+extensions: [".java", ".kt", ".scala"]
+rules:
+  - id: java.cipher
+    regex: 'Cipher\.getInstance\(\s*"(?P<algo>[^"]+)"'
+    raw_name: "{algo}"
+    confidence: high
+  - id: java.digest
+    regex: 'MessageDigest\.getInstance\(\s*"(?P<algo>[^"]+)"'
+    raw_name: "{algo}"
+    confidence: high
+  - id: java.keypairgen
+    regex: 'KeyPairGenerator\.getInstance\(\s*"(?P<algo>[^"]+)"'
+    raw_name: "{algo}"
+    confidence: high
+  - id: java.keygen
+    regex: 'KeyGenerator\.getInstance\(\s*"(?P<algo>[^"]+)"'
+    raw_name: "{algo}"
+    confidence: high
+  - id: java.signature
+    regex: 'Signature\.getInstance\(\s*"(?P<algo>[^"]+)"'
+    raw_name: "{algo}"
+    primitive: signature
+    confidence: high
+  - id: java.mac
+    regex: 'Mac\.getInstance\(\s*"(?P<algo>Hmac[^"]+)"'
+    raw_name: "{algo}"
+    primitive: mac
+    confidence: high
+  - id: java.secretkeyfactory
+    regex: 'SecretKeyFactory\.getInstance\(\s*"(?P<algo>PBKDF2[^"]+)"'
+    raw_name: "{algo}"
+    primitive: kdf
+    confidence: high
+  - id: java.keyagreement
+    regex: 'KeyAgreement\.getInstance\(\s*"(?P<algo>[^"]+)"'
+    raw_name: "{algo}"
+    primitive: key-agreement
+    confidence: high
+  - id: java.des3
+    regex: 'DESede|TripleDES'
+    raw_name: "3des"
+    confidence: medium

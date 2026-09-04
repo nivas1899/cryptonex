@@ -1,0 +1,54 @@
+# Algorithm catalogue. `classify(family, primitive, params)` in loader.py resolves
+# a status from `families` then applies the first matching `overrides` entry.
+version: "2026.02"
+
+families:
+  RSA:       {primitive: pke,           quantum_status: vulnerable, reason: "Shor's algorithm recovers the private key by factoring the modulus."}
+  DSA:       {primitive: signature,     quantum_status: vulnerable, reason: "Shor's algorithm solves the discrete-logarithm problem."}
+  DH:        {primitive: key-agreement, quantum_status: vulnerable, reason: "Finite-field Diffie-Hellman is broken by Shor's algorithm."}
+  ECC:       {primitive: signature,     quantum_status: vulnerable, reason: "Shor's algorithm solves the elliptic-curve discrete-logarithm problem."}
+  ElGamal:   {primitive: pke,           quantum_status: vulnerable, reason: "Discrete-logarithm based; broken by Shor's algorithm."}
+  AES:       {primitive: block-cipher,  quantum_status: safe,       reason: "AES-192/256 retain >=96-bit effective strength against Grover."}
+  ChaCha20:  {primitive: stream-cipher, quantum_status: safe,       reason: "256-bit key retains >=128-bit strength against Grover."}
+  3DES:      {primitive: block-cipher,  quantum_status: broken,     reason: "Deprecated (NIST SP 800-131A, 112-bit) and further weakened by Grover."}
+  DES:       {primitive: block-cipher,  quantum_status: broken,     reason: "56-bit key; classically broken."}
+  RC4:       {primitive: stream-cipher, quantum_status: broken,     reason: "Comprehensively broken classically."}
+  Blowfish:  {primitive: block-cipher,  quantum_status: broken,     reason: "64-bit block; deprecated."}
+  MD5:       {primitive: hash,          quantum_status: broken,     reason: "Practical classical collisions."}
+  SHA-1:     {primitive: hash,          quantum_status: broken,     reason: "Practical classical collisions (SHAttered)."}
+  SHA-2:     {primitive: hash,          quantum_status: safe,       reason: "SHA-256+ retains >=128-bit strength; prefer SHA-384 for >Category 1."}
+  SHA-3:     {primitive: hash,          quantum_status: safe,       reason: "Sponge construction; >=192-bit post-Grover at SHA3-384+."}
+  HMAC:      {primitive: mac,           quantum_status: safe,       reason: "Security depends on key length; >=256-bit key is safe."}
+  PBKDF2:    {primitive: kdf,           quantum_status: safe,       reason: "Not a quantum target in itself; check the underlying hash and iteration count."}
+  bcrypt:    {primitive: kdf,           quantum_status: safe,       reason: "Password hashing; not a quantum target."}
+  scrypt:    {primitive: kdf,           quantum_status: safe,       reason: "Password hashing; not a quantum target."}
+  Argon2:    {primitive: kdf,           quantum_status: safe,       reason: "Current best-practice password hashing."}
+  ML-KEM:    {primitive: kem,           quantum_status: safe,       reason: "NIST PQC standard, FIPS 203."}
+  ML-DSA:    {primitive: signature,     quantum_status: safe,       reason: "NIST PQC standard, FIPS 204."}
+  SLH-DSA:   {primitive: signature,     quantum_status: safe,       reason: "NIST PQC standard, FIPS 205 (hash-based)."}
+  FN-DSA:    {primitive: signature,     quantum_status: safe,       reason: "NIST PQC signature (Falcon)."}
+  HQC:       {primitive: kem,           quantum_status: safe,       reason: "NIST PQC backup KEM."}
+  UNKNOWN:   {primitive: other,         quantum_status: unknown,    reason: "Algorithm not recognised by the knowledge base."}
+
+overrides:
+  - when: {family: RSA, key_size_lte: 1024}
+    quantum_status: broken
+    reason: "RSA-1024 or smaller is below the NIST SP 800-131A classical minimum and Shor-vulnerable."
+  - when: {family: AES, key_size: 128}
+    quantum_status: weakened
+    reason: "Grover halves AES-128's effective strength to ~2^64 work; migrate to AES-256."
+  - when: {family: AES, mode: ECB}
+    quantum_status: weakened
+    reason: "ECB mode leaks structure regardless of key size; use an AEAD mode."
+  - when: {family: PBKDF2, hash: SHA-1}
+    quantum_status: weakened
+    reason: "PBKDF2 with a SHA-1 base is below current guidance; move to Argon2id or PBKDF2-SHA-256 with >=600k iterations."
+  - when: {family: SHA-2, parameter_set: SHA-224}
+    quantum_status: weakened
+    reason: "SHA-224 collision resistance is reduced under quantum search; prefer SHA-256 or SHA-384."
+  - when: {family: HMAC, hash: SHA-1}
+    quantum_status: weakened
+    reason: "HMAC-SHA-1 is not broken as a MAC, but SHA-1 is deprecated across standards; migrate to HMAC-SHA-256."
+  - when: {family: ECC, curve: Ed25519}
+    quantum_status: vulnerable
+    reason: "Ed25519 is an elliptic-curve signature scheme; the discrete log is solved by Shor's algorithm."

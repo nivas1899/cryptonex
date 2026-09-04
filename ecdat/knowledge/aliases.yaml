@@ -1,0 +1,121 @@
+# raw name (lower-cased, stripped) -> canonical resolution.
+# Keys that don't match exactly fall through to token heuristics in loader.py.
+aliases:
+  rs256:   {family: RSA, name: RSA, primitive: signature, params: {padding: PKCS1v15, hash: SHA-256}}
+  rs384:   {family: RSA, name: RSA, primitive: signature, params: {padding: PKCS1v15, hash: SHA-384}}
+  rs512:   {family: RSA, name: RSA, primitive: signature, params: {padding: PKCS1v15, hash: SHA-512}}
+  ps256:   {family: RSA, name: RSA, primitive: signature, params: {padding: PSS, hash: SHA-256}}
+  ps384:   {family: RSA, name: RSA, primitive: signature, params: {padding: PSS, hash: SHA-384}}
+  es256:   {family: ECC, name: ECDSA, primitive: signature, params: {curve: secp256r1, hash: SHA-256}}
+  es384:   {family: ECC, name: ECDSA, primitive: signature, params: {curve: secp384r1, hash: SHA-384}}
+  es512:   {family: ECC, name: ECDSA, primitive: signature, params: {curve: secp521r1}}
+  hs256:   {family: HMAC, name: HMAC-SHA-256, primitive: mac, params: {hash: SHA-256}}
+  hs384:   {family: HMAC, name: HMAC-SHA-384, primitive: mac, params: {hash: SHA-384}}
+  hs1:     {family: HMAC, name: HMAC-SHA-1, primitive: mac, params: {hash: SHA-1}}
+  hmacsha1:   {family: HMAC, name: HMAC-SHA-1, primitive: mac, params: {hash: SHA-1}}
+  hmacsha256: {family: HMAC, name: HMAC-SHA-256, primitive: mac, params: {hash: SHA-256}}
+  hmacsha512: {family: HMAC, name: HMAC-SHA-512, primitive: mac, params: {hash: SHA-512}}
+  hmac-sha1:  {family: HMAC, name: HMAC-SHA-1, primitive: mac, params: {hash: SHA-1}}
+  hmac-sha256: {family: HMAC, name: HMAC-SHA-256, primitive: mac, params: {hash: SHA-256}}
+  sha1:      {family: SHA-1, name: SHA-1, primitive: hash}
+  ecdsa:   {family: ECC, name: ECDSA, primitive: signature}
+  ecdh:    {family: ECC, name: ECDH, primitive: key-agreement}
+  ecies:   {family: ECC, name: ECIES, primitive: pke}
+  ed25519: {family: ECC, name: Ed25519, primitive: signature, params: {curve: Ed25519}}
+  x25519:  {family: ECC, name: X25519, primitive: key-agreement, params: {curve: Curve25519}}
+  curve25519: {family: ECC, name: X25519, primitive: key-agreement, params: {curve: Curve25519}}
+  x448:    {family: ECC, name: X448, primitive: key-agreement}
+  aesgcm:  {family: AES, name: AES, primitive: aead, params: {mode: GCM}}
+  "aes/cbc/pkcs5padding": {family: AES, name: AES, primitive: block-cipher, params: {mode: CBC, padding: PKCS5}}
+  "aes/gcm/nopadding":    {family: AES, name: AES, primitive: aead, params: {mode: GCM}}
+  "aes/ecb/pkcs5padding": {family: AES, name: AES, primitive: block-cipher, params: {mode: ECB, padding: PKCS5}}
+  "aes-128-cbc": {family: AES, name: AES, primitive: block-cipher, params: {key_size: 128, mode: CBC}}
+  "aes-192-cbc": {family: AES, name: AES, primitive: block-cipher, params: {key_size: 192, mode: CBC}}
+  "aes-256-cbc": {family: AES, name: AES, primitive: block-cipher, params: {key_size: 256, mode: CBC}}
+  "aes-128-gcm": {family: AES, name: AES, primitive: aead, params: {key_size: 128, mode: GCM}}
+  "aes-256-gcm": {family: AES, name: AES, primitive: aead, params: {key_size: 256, mode: GCM}}
+  "aes-256-ctr": {family: AES, name: AES, primitive: block-cipher, params: {key_size: 256, mode: CTR}}
+  fernet:  {family: AES, name: "AES-128-CBC (Fernet)", primitive: block-cipher, params: {key_size: 128, mode: CBC}}
+  "3des":  {family: 3DES, name: 3DES, primitive: block-cipher}
+  "3des-cbc": {family: 3DES, name: 3DES, primitive: block-cipher, params: {mode: CBC}}
+  desede:  {family: 3DES, name: 3DES, primitive: block-cipher}
+  tripledes: {family: 3DES, name: 3DES, primitive: block-cipher}
+  "des-ede3-cbc": {family: 3DES, name: 3DES, primitive: block-cipher, params: {mode: CBC}}
+  des:     {family: DES, name: DES, primitive: block-cipher}
+  rc4:     {family: RC4, name: RC4, primitive: stream-cipher}
+  arc4:    {family: RC4, name: RC4, primitive: stream-cipher}
+  arcfour: {family: RC4, name: RC4, primitive: stream-cipher}
+  blowfish: {family: Blowfish, name: Blowfish, primitive: block-cipher}
+  md5:     {family: MD5, name: MD5, primitive: hash}
+  "sha-1": {family: SHA-1, name: SHA-1, primitive: hash}
+  sha:     {family: SHA-1, name: SHA-1, primitive: hash}
+  sha224:  {family: SHA-2, name: SHA-224, primitive: hash, params: {parameter_set: SHA-224}}
+  "sha-224": {family: SHA-2, name: SHA-224, primitive: hash, params: {parameter_set: SHA-224}}
+  sha256:  {family: SHA-2, name: SHA-256, primitive: hash, params: {parameter_set: SHA-256}}
+  "sha-256": {family: SHA-2, name: SHA-256, primitive: hash, params: {parameter_set: SHA-256}}
+  sha2:    {family: SHA-2, name: SHA-256, primitive: hash}
+  "sha2-256": {family: SHA-2, name: SHA-256, primitive: hash, params: {parameter_set: SHA-256}}
+  sha384:  {family: SHA-2, name: SHA-384, primitive: hash, params: {parameter_set: SHA-384}}
+  "sha-384": {family: SHA-2, name: SHA-384, primitive: hash, params: {parameter_set: SHA-384}}
+  sha512:  {family: SHA-2, name: SHA-512, primitive: hash, params: {parameter_set: SHA-512}}
+  "sha-512": {family: SHA-2, name: SHA-512, primitive: hash, params: {parameter_set: SHA-512}}
+  sha3_256: {family: SHA-3, name: SHA3-256, primitive: hash}
+  "sha3-256": {family: SHA-3, name: SHA3-256, primitive: hash}
+  sha3_512: {family: SHA-3, name: SHA3-512, primitive: hash}
+  pbkdf2:  {family: PBKDF2, name: PBKDF2, primitive: kdf}
+  "pbkdf2-hmac-sha1":   {family: PBKDF2, name: PBKDF2-HMAC-SHA-1, primitive: kdf, params: {hash: SHA-1}}
+  "pbkdf2-hmac-sha256": {family: PBKDF2, name: PBKDF2-HMAC-SHA-256, primitive: kdf, params: {hash: SHA-256}}
+  pbkdf2withhmacsha1:   {family: PBKDF2, name: PBKDF2-HMAC-SHA-1, primitive: kdf, params: {hash: SHA-1}}
+  bcrypt:  {family: bcrypt, name: bcrypt, primitive: kdf}
+  scrypt:  {family: scrypt, name: scrypt, primitive: kdf}
+  argon2:  {family: Argon2, name: Argon2id, primitive: kdf}
+  argon2id: {family: Argon2, name: Argon2id, primitive: kdf}
+  chacha20: {family: ChaCha20, name: ChaCha20, primitive: stream-cipher}
+  "chacha20-poly1305": {family: ChaCha20, name: ChaCha20-Poly1305, primitive: aead}
+  poly1305: {family: ChaCha20, name: Poly1305, primitive: mac}
+  dh:      {family: DH, name: DH, primitive: key-agreement}
+  "diffie-hellman": {family: DH, name: DH, primitive: key-agreement}
+  dsa:     {family: DSA, name: DSA, primitive: signature}
+  rsa:     {family: RSA, name: RSA, primitive: pke}
+  "ml-kem": {family: ML-KEM, name: ML-KEM, primitive: kem}
+  "ml-kem-768": {family: ML-KEM, name: ML-KEM-768, primitive: kem, params: {parameter_set: ML-KEM-768}}
+  kyber:   {family: ML-KEM, name: ML-KEM, primitive: kem}
+  "ml-dsa": {family: ML-DSA, name: ML-DSA, primitive: signature}
+  "ml-dsa-65": {family: ML-DSA, name: ML-DSA-65, primitive: signature, params: {parameter_set: ML-DSA-65}}
+  dilithium: {family: ML-DSA, name: ML-DSA, primitive: signature}
+  "slh-dsa": {family: SLH-DSA, name: SLH-DSA, primitive: signature}
+  sphincs: {family: SLH-DSA, name: SLH-DSA, primitive: signature}
+
+# token -> family fallback when no exact alias matches
+tokens:
+  rsa: {family: RSA, primitive: pke}
+  aes: {family: AES, primitive: block-cipher}
+  ecdsa: {family: ECC, primitive: signature}
+  ecdh: {family: ECC, primitive: key-agreement}
+  ecc: {family: ECC, primitive: signature}
+  "ec": {family: ECC, primitive: signature}
+  ed25519: {family: ECC, primitive: signature}
+  x25519: {family: ECC, primitive: key-agreement}
+  curve25519: {family: ECC, primitive: key-agreement}
+  dh: {family: DH, primitive: key-agreement}
+  modp: {family: DH, primitive: key-agreement}
+  dsa: {family: DSA, primitive: signature}
+  md5: {family: MD5, primitive: hash}
+  sha1: {family: SHA-1, primitive: hash}
+  sha256: {family: SHA-2, primitive: hash}
+  sha384: {family: SHA-2, primitive: hash}
+  sha512: {family: SHA-2, primitive: hash}
+  sha3: {family: SHA-3, primitive: hash}
+  hmac: {family: HMAC, primitive: mac}
+  "3des": {family: 3DES, primitive: block-cipher}
+  desede: {family: 3DES, primitive: block-cipher}
+  des: {family: DES, primitive: block-cipher}
+  rc4: {family: RC4, primitive: stream-cipher}
+  blowfish: {family: Blowfish, primitive: block-cipher}
+  pbkdf2: {family: PBKDF2, primitive: kdf}
+  bcrypt: {family: bcrypt, primitive: kdf}
+  scrypt: {family: scrypt, primitive: kdf}
+  argon2: {family: Argon2, primitive: kdf}
+  chacha20: {family: ChaCha20, primitive: stream-cipher}
+  kyber: {family: ML-KEM, primitive: kem}
+  dilithium: {family: ML-DSA, primitive: signature}

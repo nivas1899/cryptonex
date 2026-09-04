@@ -1,0 +1,51 @@
+language: c
+extensions: [".c", ".cc", ".cpp", ".cxx", ".h", ".hpp"]
+rules:
+  - id: c.openssl.des3
+    regex: 'DES_ede3_(cbc_)?encrypt|DES_ede3_set_key|EVP_des_ede3'
+    raw_name: "3des"
+    confidence: high
+  - id: c.openssl.des
+    regex: '\bDES_(set_key|ncbc_encrypt)\b|EVP_des_cbc'
+    raw_name: des
+    confidence: high
+  - id: c.openssl.rc4
+    regex: '\bRC4\(|RC4_set_key|EVP_rc4'
+    raw_name: rc4
+    confidence: high
+  - id: c.openssl.md5
+    regex: '\bMD5_Init\b|\bMD5\(|EVP_md5'
+    raw_name: md5
+    confidence: high
+  - id: c.openssl.sha1
+    regex: '\bSHA1_Init\b|\bSHA1\(|EVP_sha1'
+    raw_name: sha1
+    confidence: high
+  - id: c.openssl.sha256
+    regex: '\bSHA256_Init\b|EVP_sha256'
+    raw_name: sha256
+    confidence: high
+  - id: c.openssl.rsa
+    regex: '\bRSA_(generate_key|generate_key_ex|sign|verify|public_encrypt|private_decrypt)\b'
+    raw_name: rsa
+    primitive: pke
+    confidence: high
+  - id: c.openssl.ec
+    regex: '\bEC_KEY_(new|generate_key)\b|ECDSA_(sign|do_sign)'
+    raw_name: ecdsa
+    primitive: signature
+    confidence: high
+  - id: c.openssl.dh
+    regex: '\bDH_(generate_key|generate_parameters)\b|EVP_PKEY_CTX_set_dh'
+    raw_name: dh
+    primitive: key-agreement
+    confidence: high
+  - id: c.openssl.aesgcm
+    regex: 'EVP_aes_256_gcm|EVP_aes_128_gcm'
+    raw_name: aesgcm
+    primitive: aead
+    confidence: high
+  - id: c.openssl.aescbc
+    regex: 'EVP_aes_128_cbc|AES_cbc_encrypt'
+    raw_name: "aes-128-cbc"
+    confidence: medium

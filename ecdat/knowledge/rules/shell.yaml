@@ -1,0 +1,11 @@
+language: shell
+extensions: [".sh", ".bash"]
+rules:
+  - id: sh.md5sum
+    regex: '\bmd5sum\b'
+    raw_name: md5
+    confidence: medium
+  - id: sh.sha1sum
+    regex: '\bsha1sum\b'
+    raw_name: sha1
+    confidence: medium

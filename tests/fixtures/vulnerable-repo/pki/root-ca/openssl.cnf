@@ -1,0 +1,9 @@
+[req]
+default_bits = 4096
+default_md = sha384
+distinguished_name = dn
+x509_extensions = v3_ca
+
+[v3_ca]
+basicConstraints = critical, CA:TRUE, pathlen:1
+keyUsage = critical, keyCertSign, cRLSign

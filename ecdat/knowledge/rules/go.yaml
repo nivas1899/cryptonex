@@ -1,0 +1,66 @@
+language: go
+extensions: [".go"]
+rules:
+  - id: go.md5
+    regex: '\bmd5\.(New|Sum)\b'
+    raw_name: md5
+    confidence: high
+  - id: go.sha1
+    regex: '\bsha1\.(New|Sum)\b'
+    raw_name: sha1
+    confidence: high
+  - id: go.sha256
+    regex: '\bsha256\.(New|New224|Sum256|Sum224)\b'
+    raw_name: sha256
+    confidence: high
+  - id: go.sha512
+    regex: '\bsha512\.(New|Sum512|Sum384)\b'
+    raw_name: sha512
+    confidence: high
+  - id: go.sha3
+    regex: '\bsha3\.(New256|New512|Sum256)\b'
+    raw_name: "sha3-256"
+    confidence: high
+  - id: go.aesgcm
+    regex: 'cipher\.NewGCM\('
+    raw_name: "aes-256-gcm"
+    primitive: aead
+    confidence: medium
+  - id: go.aescbc
+    regex: 'cipher\.NewCBCEncrypter\(|cipher\.NewCBCDecrypter\('
+    raw_name: "aes-256-cbc"
+    primitive: block-cipher
+    confidence: medium
+  - id: go.rsa
+    regex: 'rsa\.(GenerateKey|SignPKCS1v15|SignPSS|EncryptOAEP|DecryptOAEP)\('
+    raw_name: rsa
+    primitive: pke
+    confidence: high
+  - id: go.ecdsa
+    regex: 'ecdsa\.(GenerateKey|SignASN1|Sign|Verify)\('
+    raw_name: ecdsa
+    primitive: signature
+    confidence: high
+  - id: go.ed25519
+    regex: 'ed25519\.(GenerateKey|Sign|NewKeyFromSeed)\('
+    raw_name: ed25519
+    primitive: signature
+    confidence: high
+  - id: go.ecdh
+    regex: 'ecdh\.(P256|P384|X25519)\('
+    raw_name: ecdh
+    primitive: key-agreement
+    confidence: high
+  - id: go.des
+    regex: 'des\.NewTripleDESCipher\(|des\.NewCipher\('
+    raw_name: "3des"
+    confidence: medium
+  - id: go.rc4
+    regex: 'rc4\.NewCipher\('
+    raw_name: rc4
+    confidence: high
+  - id: go.chacha20
+    regex: 'chacha20poly1305\.New\(|chacha20\.NewUnauthenticatedCipher\('
+    raw_name: "chacha20-poly1305"
+    primitive: aead
+    confidence: high

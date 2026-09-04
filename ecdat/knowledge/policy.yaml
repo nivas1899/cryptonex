@@ -1,0 +1,92 @@
+# Lifetime, effort, criticality and classification heuristics used by the enricher chain.
+version: "2026.02"
+
+# X — years the data protected by an asset must stay confidential, by classification.
+data_lifetime_years:
+  SECRET: 20
+  PCI: 10
+  PII: 7
+  INTERNAL: 4
+  PUBLIC: 0
+default_data_class: INTERNAL
+
+# Y — years to migrate, by the recommendation's effort estimate.
+migration_years:
+  trivial: 0.3
+  low: 0.7
+  medium: 1.5
+  high: 3.0
+  architectural: 5.0
+
+# Data classification hints — first keyword found in an asset's path wins.
+data_class_hints:
+  - {keyword: payment, class: PCI}
+  - {keyword: billing, class: PCI}
+  - {keyword: card, class: PCI}
+  - {keyword: settlement, class: PCI}
+  - {keyword: vault, class: SECRET}
+  - {keyword: auth, class: SECRET}
+  - {keyword: password, class: SECRET}
+  - {keyword: secret, class: SECRET}
+  - {keyword: kms, class: SECRET}
+  - {keyword: pki, class: SECRET}
+  - {keyword: token, class: SECRET}
+  - {keyword: session, class: PII}
+  - {keyword: user, class: PII}
+  - {keyword: profile, class: PII}
+  - {keyword: webhook, class: PII}
+  - {keyword: test, class: PUBLIC}
+  - {keyword: fixture, class: PUBLIC}
+  - {keyword: example, class: PUBLIC}
+
+# External-facing hints — any keyword present in the path.
+external_hints: [edge, nginx, envoy, ingress, gateway, public, tls, ssl, https, webhook, mesh, vpn, ipsec, strongswan]
+
+# Criticality scoring.
+criticality:
+  keyword_weights:
+    auth: 25
+    identity: 22
+    login: 20
+    password: 25
+    payment: 30
+    billing: 28
+    wallet: 30
+    card: 25
+    settlement: 25
+    sign: 20
+    signing: 20
+    jwt: 18
+    token: 16
+    kms: 25
+    hsm: 25
+    secret: 22
+    vault: 25
+    pki: 22
+    "root-ca": 15
+    prod: 15
+    production: 15
+    test: -30
+    fixture: -35
+    example: -30
+    sample: -25
+  external_weight: 30
+  ca_key_weight: 15
+  data_class_weights:
+    PUBLIC: 0
+    INTERNAL: 10
+    PII: 25
+    PCI: 30
+    SECRET: 40
+  buckets:
+    critical: 75
+    high: 50
+    medium: 25
+
+# context tags for recommendation matching, from path keywords
+context_hints:
+  - {keyword: "root-ca", tag: root-ca}
+  - {keyword: rootca, tag: root-ca}
+  - {keyword: firmware, tag: firmware}
+  - {keyword: "code-sign", tag: code-signing}
+  - {keyword: codesign, tag: code-signing}

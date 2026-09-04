@@ -1,0 +1,12 @@
+# Scan the mounted directory, then serve the console.
+services:
+  ecdat:
+    build: .
+    command: >
+      sh -c "ecdat scan /scan --out /out &&
+             ecdat serve --result /out/result.json --port 8713"
+    ports:
+      - "8713:8713"
+    volumes:
+      - ${SCAN_DIR:-./tests/fixtures/vulnerable-repo}:/scan:ro
+      - ./ecdat-out:/out

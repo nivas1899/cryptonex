@@ -1,0 +1,68 @@
+language: python
+extensions: [".py"]
+rules:
+  - id: py.hashlib.direct
+    regex: 'hashlib\.(?P<algo>md5|sha1|sha224|sha256|sha384|sha512|sha3_256|sha3_512)\s*\('
+    raw_name: "{algo}"
+    confidence: high
+  - id: py.hashlib.new
+    regex: 'hashlib\.new\(\s*[''"](?P<algo>[A-Za-z0-9_-]+)[''"]'
+    raw_name: "{algo}"
+    confidence: high
+  - id: py.pbkdf2
+    regex: 'pbkdf2_hmac\(\s*[''"](?P<hash>[A-Za-z0-9]+)[''"]'
+    raw_name: "pbkdf2-hmac-{hash}"
+    primitive: kdf
+    confidence: high
+  - id: py.jwt.encode
+    regex: 'jwt\.(?:encode|decode)\([^)]*?algorithms?\s*=\s*\[?\s*[''"](?P<algo>[A-Za-z0-9]+)[''"]'
+    raw_name: "{algo}"
+    primitive: signature
+    confidence: high
+  - id: py.bcrypt
+    regex: 'bcrypt\.(?:hashpw|gensalt|kdf)\s*\('
+    raw_name: bcrypt
+    primitive: kdf
+    confidence: high
+  - id: py.argon2
+    regex: 'argon2|PasswordHasher\('
+    raw_name: argon2id
+    primitive: kdf
+    confidence: medium
+  - id: py.crypto.rsa
+    regex: 'rsa\.generate_private_key\s*\(|RSA\.generate\s*\(|serialization.*RSAPrivateKey'
+    raw_name: rsa
+    primitive: pke
+    confidence: high
+  - id: py.crypto.ec
+    regex: 'ec\.generate_private_key\s*\(\s*ec\.SECP(?P<bits>\d+)R1|ec\.generate_private_key\s*\(|ECC\.generate\s*\('
+    raw_name: ecdsa
+    primitive: signature
+    confidence: medium
+  - id: py.crypto.dh
+    regex: 'dh\.generate_parameters\s*\(|DiffieHellman'
+    raw_name: dh
+    primitive: key-agreement
+    confidence: medium
+  - id: py.crypto.aesgcm
+    regex: 'AESGCM\(|modes\.GCM\('
+    raw_name: aesgcm
+    primitive: aead
+    confidence: high
+  - id: py.crypto.aescbc
+    regex: 'modes\.CBC\('
+    raw_name: "aes-256-cbc"
+    primitive: block-cipher
+    confidence: medium
+  - id: py.fernet
+    regex: 'Fernet\('
+    raw_name: fernet
+    confidence: medium
+  - id: py.des3
+    regex: 'TripleDES\(|DES3\.'
+    raw_name: "3des"
+    confidence: medium
+  - id: py.rc4
+    regex: 'ARC4\(|Cipher\.ARC4'
+    raw_name: rc4
+    confidence: medium

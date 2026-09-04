@@ -1,0 +1,33 @@
+# Package -> cryptography it provides. `flag: true` (or a matched version ceiling)
+# marks the library itself as a migration concern and emits its provided primitives
+# as assets tied to the manifest location.
+version: "2026.02"
+libraries:
+  - {ecosystem: pip, name: pyjwt, version_lt: "2.0.0", flag: true,
+     reason: "PyJWT < 2.0 defaults to HS256 and predates algorithm-confusion hardening.",
+     provides: [{raw: hs256}]}
+  - {ecosystem: pip, name: pycryptodome,
+     provides: [{raw: rsa}, {raw: "aes-256-cbc"}, {raw: dsa}]}
+  - {ecosystem: pip, name: cryptography,
+     provides: [{raw: rsa}, {raw: ecdsa}]}
+  - {ecosystem: pip, name: rsa, flag: true,
+     reason: "The pure-Python 'rsa' package implements RSA only.",
+     provides: [{raw: rsa}]}
+  - {ecosystem: pip, name: bcrypt, provides: [{raw: bcrypt}]}
+  - {ecosystem: pip, name: argon2-cffi, provides: [{raw: argon2id}]}
+  - {ecosystem: pip, name: pyopenssl, provides: [{raw: rsa}, {raw: ecdsa}]}
+  - {ecosystem: pip, name: paramiko, provides: [{raw: rsa}, {raw: ed25519}]}
+
+  - {ecosystem: maven, name: "org.bouncycastle:bcprov-jdk15on", version_lt: "1.71", flag: true,
+     reason: "BouncyCastle prior to 1.71/jdk18on predates the post-quantum provider.",
+     provides: [{raw: rsa}, {raw: ecdsa}, {raw: dh}]}
+  - {ecosystem: maven, name: "org.bouncycastle:bcprov-jdk18on",
+     provides: [{raw: rsa}, {raw: ecdsa}, {raw: dh}]}
+  - {ecosystem: maven, name: "com.auth0:java-jwt", provides: [{raw: hs256}]}
+
+  - {ecosystem: npm, name: jsonwebtoken, provides: [{raw: hs256}]}
+  - {ecosystem: npm, name: node-forge, provides: [{raw: rsa}, {raw: "aes-256-cbc"}, {raw: des}]}
+  - {ecosystem: npm, name: bcryptjs, provides: [{raw: bcrypt}]}
+  - {ecosystem: npm, name: "node-rsa", flag: true, reason: "RSA-only helper.", provides: [{raw: rsa}]}
+
+  - {ecosystem: go, name: "golang.org/x/crypto", provides: [{raw: ed25519}, {raw: chacha20}]}

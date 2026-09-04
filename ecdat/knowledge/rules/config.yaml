@@ -1,0 +1,32 @@
+language: config
+extensions: [".conf", ".cnf", ".ini", ".cfg", ".properties", ".yaml", ".yml", ".toml"]
+rules:
+  - id: cfg.ecdh_curve
+    regex: 'ssl_ecdh_curve\s+(?P<curve>prime256v1|secp256r1|secp384r1|X25519)'
+    raw_name: ecdh
+    primitive: key-agreement
+    external: true
+    confidence: high
+  - id: cfg.ecdh_curves_list
+    regex: 'ecdh_curves\s*[:=].*(?P<curve>X25519|P-256|prime256v1)'
+    raw_name: x25519
+    primitive: key-agreement
+    external: true
+    confidence: medium
+  - id: cfg.ike_modp
+    regex: '\bmodp(?P<bits>\d{3,4})\b'
+    raw_name: dh
+    primitive: key-agreement
+    external: true
+    confidence: high
+  - id: cfg.openssl_bits
+    regex: 'default_bits\s*=\s*(?P<bits>\d{3,4})'
+    raw_name: rsa
+    primitive: signature
+    confidence: high
+  - id: cfg.ike_suite
+    regex: 'ike\s*=\s*aes\d+-sha\d+-modp(?P<bits>\d+)'
+    raw_name: dh
+    primitive: key-agreement
+    external: true
+    confidence: high

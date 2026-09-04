@@ -1,0 +1,96 @@
+# Recommendation rules. First rule (most specific) whose `match` is satisfied wins.
+# `match` keys: primitive (list), family (list), context (list, from data class or path).
+version: "2026.02"
+rules:
+  - id: rec.sig.longlived
+    match: {primitive: [signature], context: [root-ca, firmware, code-signing]}
+    target: SLH-DSA-SHA2-192s
+    nist_category: 3
+    library_support: ["liboqs / oqs-provider", "BouncyCastle >= 1.78"]
+    protocol_support: "X.509: parallel PQC root, cross-sign during trust-store transition"
+    latency_class: large-signature
+    default_effort: architectural
+    rationale: >
+      {name} is a long-lived / root-of-trust signature — the most conservative case.
+      Prefer the hash-based SLH-DSA (FIPS 205) despite larger signatures and slower signing.
+      Stand up a parallel PQC root and cross-sign during the transition.
+
+  - id: rec.sig.rsa-ecdsa
+    match: {primitive: [signature], family: [RSA, DSA, ECC]}
+    target: ML-DSA-65
+    nist_category: 3
+    library_support: ["OpenSSL >= 3.5", "liboqs / oqs-provider", "BouncyCastle >= 1.78"]
+    protocol_support: "JWT/JWS: register the ML-DSA alg; dual-sign through rollover"
+    latency_class: larger-signature
+    default_effort: medium
+    rationale: >
+      {name} signatures are forgeable by a cryptographically-relevant quantum computer.
+      Migrate to ML-DSA-65 (FIPS 204); issue dual-signed artefacts until every verifier is upgraded.
+
+  - id: rec.kex.rsa-ecdh-dh
+    match: {primitive: [key-agreement, pke, kem], family: [RSA, DH, ECC, ElGamal]}
+    target: ML-KEM-768
+    hybrid_option: X25519+ML-KEM-768
+    nist_category: 3
+    library_support: ["OpenSSL >= 3.5", "BoringSSL", "liboqs / oqs-provider"]
+    protocol_support: "TLS 1.3 hybrid KEX (X25519MLKEM768); IKEv2 additional key exchange (RFC 9370)"
+    latency_class: larger-key-shares
+    default_effort: low
+    rationale: >
+      {name} key establishment is broken by Shor's algorithm, and recorded sessions are
+      decryptable retroactively. Move to ML-KEM-768 (FIPS 203); during transition use the
+      hybrid X25519+ML-KEM-768 so the channel is safe if either component is later weakened.
+
+  - id: rec.sym.aes128
+    match: {family: [AES], key_size: 128}
+    target: AES-256-GCM
+    latency_class: comparable
+    default_effort: trivial
+    rationale: >
+      Grover halves AES-128's effective strength. Re-key to AES-256 and prefer an AEAD mode (GCM).
+
+  - id: rec.cipher.legacy
+    match: {family: [3DES, DES, RC4, Blowfish]}
+    target: AES-256-GCM
+    latency_class: comparable
+    default_effort: medium
+    rationale: >
+      {name} is deprecated / broken. Replace with AES-256-GCM. Where a counterparty protocol
+      is involved, the change must be coordinated with them.
+
+  - id: rec.mac.sha1
+    match: {family: [HMAC], hash: [SHA-1]}
+    target: HMAC-SHA-256
+    latency_class: comparable
+    default_effort: low
+    rationale: >
+      HMAC-SHA-1 is not forgeable today, but SHA-1 is deprecated across standards.
+      Move signing/verification to HMAC-SHA-256 and sunset the SHA-1 path.
+
+  - id: rec.hash.weak
+    match: {family: [MD5, SHA-1]}
+    target: SHA-256
+    latency_class: comparable
+    default_effort: low
+    rationale: >
+      {name} has practical classical collisions — a present-day issue, not a quantum one.
+      Move to SHA-256 (or SHA-384 above Category 1).
+
+  - id: rec.kdf.weak
+    match: {family: [PBKDF2], hash: [SHA-1]}
+    target: Argon2id
+    hybrid_option: "PBKDF2-HMAC-SHA-256 >= 600k iterations (interim)"
+    latency_class: tunable
+    default_effort: medium
+    rationale: >
+      Not a Shor target, but a SHA-1 base with a low iteration count is far below current guidance.
+      Upgrade to Argon2id, re-hashing transparently as users authenticate.
+
+  - id: rec.library.eol
+    match: {asset_type: [library]}
+    target: "current release (adds ML-KEM / ML-DSA)"
+    latency_class: n/a
+    default_effort: low
+    rationale: >
+      {name} is end-of-life or predates post-quantum support. Upgrading it is the prerequisite
+      for the crypto migrations that depend on it.
