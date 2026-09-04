@@ -2,7 +2,30 @@
 
 ECDAT reads a **directory of source code** (plus its dependency manifests and certificate
 files) and produces a cryptographic inventory + post-quantum risk assessment.
-Nothing is uploaded — it runs entirely on your machine.
+**Nothing is uploaded anywhere** — the scan runs on your machine. "Upload a zip" in the
+console just means ECDAT unpacks it into a local temp folder and scans it there.
+
+---
+
+## 0. Fastest path — scan from the console
+
+```bash
+ecdat serve                     # opens http://localhost:8713 on the "Scan" page
+```
+
+On the **Scan** page:
+- **Local folder** tab → type the path to your codebase → *Run scan*
+- **Upload a .zip** tab → drop a zip of your repo → *Run scan*
+
+Results appear immediately (Overview / Inventory / Mosca Lab) and you can download
+`cbom.json`, `result.json` and `report.html` from the Scan page.
+
+With Docker, mount your code and point the path box at the mount:
+
+```bash
+docker run --rm -p 8713:8713 -v "/path/to/your/repo":/code:ro ecdat:local serve
+# then in the browser, Local folder → /code → Run scan
+```
 
 ---
 
