@@ -20,6 +20,23 @@ from cryptonex.reporters.sarif import to_sarif
 
 st.set_page_config(page_title="CRYPTONEX Console", layout="wide", page_icon="🔐")
 
+# Sizing: Streamlit's defaults read small at 100% browser zoom on a wide screen.
+# Widen the content column, pull the top padding in, and nudge type/metrics up so
+# the console is comfortable at 100% instead of needing 110–120%.
+st.markdown("""
+<style>
+  .block-container { max-width: 1550px; padding-top: 2.4rem; padding-bottom: 3rem; }
+  section[data-testid="stSidebar"] { width: 250px !important; }
+  [data-testid="stMetricValue"] { font-size: 1.9rem; line-height: 1.15; }
+  [data-testid="stMetricLabel"] p { font-size: .85rem; }
+  [data-testid="stMetricDelta"] { font-size: .8rem; }
+  h2, [data-testid="stHeadingWithActionElements"] h2 { font-size: 1.45rem; }
+  h3 { font-size: 1.1rem; }
+  [data-testid="stDataFrame"] { font-size: .92rem; }
+  .stRadio label p { font-size: .95rem; }
+</style>
+""", unsafe_allow_html=True)
+
 _SEV = {"safe": "#2f7c50", "weakened": "#9a6700", "vulnerable": "#bc4c00",
         "broken": "#cf222e", "unknown": "#6a747d"}
 

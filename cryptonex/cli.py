@@ -147,6 +147,7 @@ def serve(
         "--theme.linkColor", "#1f5fbf",
         "--theme.borderColor", "#e2e5e8",
         "--theme.baseRadius", "small",
+        "--theme.baseFontSize", "15",
         "--theme.showWidgetBorder", "true",
         "--client.toolbarMode", "minimal",
         "--browser.gatherUsageStats", "false",

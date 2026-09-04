@@ -13,7 +13,7 @@ showWidgetBorder = true
 baseRadius = "small"
 font = "sans-serif"
 codeFont = "monospace"
-baseFontSize = 14
+baseFontSize = 15
 
 [theme.sidebar]
 backgroundColor = "#ffffff"
