@@ -4,6 +4,7 @@ import hashlib
 import json
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Callable
 
 from cryptonex import __version__
 from cryptonex.core.enrich import enrich_and_assess
@@ -22,8 +23,11 @@ from cryptonex.domain.pqc_readiness import build_readiness
 from cryptonex.domain.posture import build_posture
 from cryptonex.knowledge import get_kb
 from cryptonex.scanners import all_scanners
-from cryptonex.scanners.base import ScanContext
+from cryptonex.scanners.base import ScanContext, walk_files
 from cryptonex.scanners.misuse import scan_constants
+
+# (fraction 0..1, status message) — called from real file-visit counts, never a fake timer
+ProgressCB = Callable[[float, str], None]
 
 
 def run_scan(
@@ -33,6 +37,7 @@ def run_scan(
     now_year: int | None = None,
     x: float | None = None,
     y: float | None = None,
+    progress_cb: ProgressCB | None = None,
 ) -> ScanResult:
     kb = get_kb()
     root = Path(target).resolve()
@@ -41,13 +46,34 @@ def run_scan(
     now_year = now_year or datetime.now().year
     started = datetime.now(timezone.utc)
 
-    ctx = ScanContext(root=root)
-    raw_findings: list[RawFinding] = []
-    findings: list[SecurityFinding] = []
+    selected = all_scanners(scanners)
     run_names: list[str] = []
     scanner_errors: list[str] = []
 
-    for sc in all_scanners(scanners):
+    # ---- progress: count real candidate files once, then track real visits ----
+    # every registered scanner does one full walk_files() pass over the target,
+    # plus one more for the hand-rolled-crypto constant pass — so total file-passes
+    # is a known, honest denominator, not an estimate.
+    state = {"visited": 0, "last_pct": -1, "stage": "preparing"}
+    total_files = sum(1 for _ in walk_files(ScanContext(root=root))) if progress_cb else 0
+    denom = max(1, total_files * (len(selected) + 1))
+
+    def _on_visit() -> None:
+        state["visited"] += 1
+        if progress_cb is None:
+            return
+        pct = min(0.98, state["visited"] / denom)
+        pct_i = int(pct * 100)
+        if pct_i != state["last_pct"]:
+            state["last_pct"] = pct_i
+            progress_cb(pct, f"{state['stage']} — {state['visited']}/{denom} file-passes")
+
+    ctx = ScanContext(root=root, on_visit=_on_visit if progress_cb else None)
+    raw_findings: list[RawFinding] = []
+    findings: list[SecurityFinding] = []
+
+    for sc in selected:
+        state["stage"] = f"running {sc.name} scanner"
         run_names.append(sc.name)
         try:
             for item in sc.scan(ctx):
@@ -59,6 +85,7 @@ def run_scan(
             scanner_errors.append(f"collector '{sc.name}' stopped early: {type(exc).__name__}")
 
     # constant / hand-rolled-crypto pass
+    state["stage"] = "scanning for hand-rolled / embedded crypto constants"
     try:
         _const = list(scan_constants(ctx))
     except Exception as exc:
@@ -90,12 +117,18 @@ def run_scan(
         f.test_path = is_test_path(f.location.split("!")[-1])
     findings.sort(key=lambda f: (f.test_path, -_SEV_RANK[f.severity], f.location))
 
+    if progress_cb:
+        progress_cb(0.98, f"normalizing {len(raw_findings)} raw findings into assets")
     assets, graph = normalize(raw_findings)
+    if progress_cb:
+        progress_cb(0.99, f"scoring {len(assets)} assets (quantum status, Mosca, risk)")
     assets = enrich_and_assess(assets, crqc_year=crqc_year, now_year=now_year,
                                x_override=x, y_override=y)
     assets.sort(key=lambda a: (-a.risk_score, a.id))
     posture = build_posture(assets)
     readiness = build_readiness(assets, now_year=now_year)
+    if progress_cb:
+        progress_cb(1.0, "done")
 
     finished = datetime.now(timezone.utc)
     cfg = {"scanners": run_names, "crqc_year": crqc_year, "x": x, "y": y}

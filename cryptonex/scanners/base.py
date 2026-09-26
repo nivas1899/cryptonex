@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Iterator
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Callable
 
 from cryptonex.domain.models import RawFinding
 
@@ -23,6 +24,7 @@ class ScanContext:
     root: Path
     _parsed: set = field(default_factory=set)
     files_skipped: dict[str, int] = field(default_factory=dict)
+    on_visit: Callable[[], None] | None = None  # fired once per candidate file per walk pass
 
     @property
     def files_parsed(self) -> int:
@@ -44,6 +46,10 @@ class ScanContext:
         except ValueError:
             return str(p)
 
+    def visit(self) -> None:
+        if self.on_visit:
+            self.on_visit()
+
 
 class Scanner(ABC):
     name: str = "scanner"
@@ -56,6 +62,7 @@ def walk_files(ctx: ScanContext) -> Iterator[Path]:
     """Yield every non-skipped regular file under the scan root."""
     root = ctx.root
     if root.is_file():
+        ctx.visit()
         yield root
         return
     for p in sorted(root.rglob("*")):
@@ -63,6 +70,7 @@ def walk_files(ctx: ScanContext) -> Iterator[Path]:
             continue
         if not p.is_file():
             continue
+        ctx.visit()
         try:
             if p.stat().st_size > MAX_FILE_BYTES:
                 ctx.skip("too-large")

@@ -1,6 +1,6 @@
 # CRYPTONEX benchmark — real open-source repositories
 
-_7 repositories scanned._
+_8 repositories scanned._
 
 Assets / findings columns show **production (test-path)**. Grade is on production assets only.
 
@@ -13,6 +13,7 @@ Assets / findings columns show **production (test-path)**. Grade is on productio
 | `golang-jwt` | Go JWT (successor to dgrijalva) | 106 | 3 (11) | 5 (1) | 3 | 0 | A | 0.2s |
 | `node-jsonwebtoken` | Node JWT | 113 | 0 (31) | 2 (6) | 0 | 0 | A | 0.2s |
 | `cryptography` | the reference Python crypto library | 3076 | 21 (10) | 31 (98) | 9 | 4 | A | 4.5s |
+| `certbot` | Let's Encrypt ACME client — certs, TLS, keys | 823 | 27 (33) | 21 (35) | 12 | 1 | A | 4.8s |
 
 ## Algorithm families detected per repo
 
@@ -23,3 +24,4 @@ Assets / findings columns show **production (test-path)**. Grade is on productio
 - **golang-jwt**: DSA, ECC, RSA
 - **node-jsonwebtoken**: DSA, ECC, HMAC, RSA
 - **cryptography**: 3DES, AES, Argon2, ChaCha20, DES, DH, DSA, ECC
+- **certbot**: DH, ECC, MD5, RSA, SHA-2, bcrypt, pynacl, pyopenssl (found a real `requests.get(..., verify=False)` in `acme/challenges.py`)

@@ -1,0 +1,217 @@
+CRYPTONEX - DEMO VIDEO SLIDE SCRIPT
+Source: docs/cryptonex-demo.mp4 (82.2s) -> CRYPTONEX_Demo_Deck.pptx (14 slides)
+Each slide's content is separated by a line containing only ---
+
+---
+
+SLIDE 1 - CRYPTONEX
+[0:00 - 0:03]  Cryptographic Bill of Materials & Post-Quantum Readiness Console
+
+SAY:
+(no narration - let the title land)
+
+ON SCREEN:
+  - SIH 2026 | Problem Statement 26164
+  - Offline-first. Nothing ever leaves the machine.
+
+VISUAL: full-bleed title card (no screenshot)
+
+---
+
+SLIDE 2 - You Cannot Migrate What You Cannot See
+[0:03 - 0:08]  Scan page, idle
+
+SAY:
+You cannot migrate what you cannot see. CRYPTONEX scans a codebase locally - nothing is ever uploaded.
+
+ON SCREEN:
+  - Point it at any codebase - no agent, no cloud, no telemetry
+  - The scan runs entirely on the local machine
+  - Air-gap safe: suitable for regulated and classified estates
+
+VISUAL: 01-scan.png
+
+---
+
+SLIDE 3 - 46 Cryptographic Assets, Graded
+[0:08 - 0:14]  Estate posture
+
+SAY:
+Forty-six cryptographic assets found. Estate posture: grade B out of a hundred.
+
+ON SCREEN:
+  - 46 crypto assets discovered across the estate
+  - Single headline posture grade: B / 100
+  - One number a CISO can take to the board
+
+VISUAL: 02-overview.png
+
+---
+
+SLIDE 4 - Quantum Status and Criticality at a Glance
+[0:14 - 0:21]  Overview donuts
+
+SAY:
+Quantum status and criticality, at a glance - color-coded, and every color explained. Click any slice to drill straight in.
+
+ON SCREEN:
+  - Two donuts: quantum status and business criticality
+  - Every color is defined in-product - no legend guesswork
+  - Charts are navigation: click a slice to drill in
+
+VISUAL: 03-overview-donuts.png
+
+---
+
+SLIDE 5 - One Click to the 15 Assets That Matter
+[0:21 - 0:27]  Vulnerable -> Inventory, filtered
+
+SAY:
+One click on 'Vulnerable' - and we're in the inventory, already filtered to the fifteen assets that need attention.
+
+ON SCREEN:
+  - Clicking 'Vulnerable' lands in the inventory pre-filtered
+  - 15 of 46 assets flagged as quantum-vulnerable
+  - Zero manual filtering between insight and action
+
+VISUAL: 04-inventory-filtered.png
+
+---
+
+SLIDE 6 - Inside One Asset: The RSA Root of Trust
+[0:27 - 0:35]  Inventory detail
+
+SAY:
+Let's inspect one: the RSA root of trust. Observed evidence, inferred criticality, the Mosca exposure window, and the exact post-quantum recommendation.
+
+ON SCREEN:
+  - Observed evidence - where and how the asset was found
+  - Inferred criticality, with the reasoning shown
+  - Mosca exposure window and the exact PQC replacement
+
+VISUAL: 05-inventory-detail.png
+
+---
+
+SLIDE 7 - 25 Real-World Misuse Findings
+[0:35 - 0:40]  Weaknesses, severity donut
+
+SAY:
+Twenty-five real-world misuse findings - hardcoded keys, weak modes, disabled TLS checks. Click a severity to filter.
+
+ON SCREEN:
+  - Hardcoded keys, weak cipher modes, disabled TLS verification
+  - Beyond inventory: how the crypto is actually misused
+  - Severity donut doubles as the filter control
+
+VISUAL: 06-weaknesses.png
+
+---
+
+SLIDE 8 - 5 Critical Findings, Isolated Instantly
+[0:40 - 0:46]  Weaknesses filtered to Critical
+
+SAY:
+Five critical findings, isolated instantly - each with the exact line, the fix, and the CWE.
+
+ON SCREEN:
+  - Exact file and line number for every finding
+  - A concrete remediation, not a generic warning
+  - CWE mapping for audit and ticket traceability
+
+VISUAL: 07-weaknesses-filtered.png
+
+---
+
+SLIDE 9 - Post-Quantum Readiness, Sequenced
+[0:46 - 0:53]  PQC readiness: timeline + migration waves
+
+SAY:
+Post-quantum readiness: a crypto-agility score, a quantum-risk timeline, and migration waves sequenced by effort.
+
+ON SCREEN:
+  - Crypto-agility score: how replaceable the estate really is
+  - Quantum-risk timeline projected across the coming years
+  - Migration waves ordered by effort - a plan, not a list
+
+VISUAL: 08-pqc-readiness.png
+
+---
+
+SLIDE 10 - The Mosca Lab: Model Your Own Assumptions
+[0:53 - 0:58]  Mosca Lab, NIST baseline
+
+SAY:
+The Mosca Lab lets you model your own assumptions - how long data must stay secret, how long migration takes.
+
+ON SCREEN:
+  - Mosca's inequality made interactive
+  - Set data shelf life and migration duration yourself
+  - Starts from the NIST baseline assumptions
+
+VISUAL: 09-mosca-baseline.png
+
+---
+
+SLIDE 11 - EU-2030 Preset: 24 of 46 Assets Fall at Risk
+[0:58 - 1:05]  Regulator preset, live recompute
+
+SAY:
+Switch to the EU-2030 regulator preset - assumptions tighten, and twenty-four of forty-six assets fall at risk. Everything recomputes live.
+
+ON SCREEN:
+  - Regulator presets encode real compliance deadlines
+  - Tighter assumptions push at-risk assets from 15 to 24
+  - Every score, chart and wave recomputes live
+
+VISUAL: 10-mosca-regulator.png
+
+---
+
+SLIDE 12 - Nothing Here Is a Black Box
+[1:05 - 1:12]  Coverage: the color and rating glossary
+
+SAY:
+And nothing here is a black box - every color, every score, every rating is explained, right in the console.
+
+ON SCREEN:
+  - Built-in glossary for every color, score and rating
+  - Explanations live in the console, not a separate manual
+  - Auditable by design - defensible in front of a regulator
+
+VISUAL: 11-coverage-glossary.png
+
+---
+
+SLIDE 13 - Export CBOM, SARIF and Report - Fully Offline
+[1:12 - 1:18]  Scan page: deliverables
+
+SAY:
+Export the CBOM, SARIF, and report - fully offline, ready for a GRC platform, a SIEM, or your CI pipeline.
+
+ON SCREEN:
+  - CBOM for GRC platforms and asset inventories
+  - SARIF for SIEM ingestion and CI/CD gating
+  - Human-readable report for auditors and leadership
+
+VISUAL: 12-scan-downloads.png
+
+---
+
+SLIDE 14 - See It. Score It. Migrate It.
+[1:18 - 1:22]  CRYPTONEX
+
+SAY:
+(no narration - let the tagline land)
+
+ON SCREEN:
+  - Discover every cryptographic asset - locally
+  - Score quantum exposure with Mosca's inequality
+  - Ship a sequenced, auditable migration plan
+
+VISUAL: full-bleed title card (no screenshot)
+
+---
+
+END OF SCRIPT
+Total runtime ~1:22 | ~185 spoken words | ~135 wpm

@@ -1,0 +1,47 @@
+1
+00:00:03,200 --> 00:00:08,200
+You cannot migrate what you cannot see. CRYPTONEX scans a codebase locally — nothing is ever uploaded.
+
+2
+00:00:08,200 --> 00:00:14,200
+Forty-six cryptographic assets found. Estate posture: grade B out of a hundred.
+
+3
+00:00:14,200 --> 00:00:21,200
+Quantum status and criticality, at a glance — color-coded, and every color explained. Click any slice to drill straight in.
+
+4
+00:00:21,200 --> 00:00:27,200
+One click on ‘Vulnerable’ — and we're in the inventory, already filtered to the fifteen assets that need attention.
+
+5
+00:00:27,200 --> 00:00:35,200
+Let's inspect one: the RSA root of trust. Observed evidence, inferred criticality, the Mosca exposure window, and the exact post-quantum recommendation.
+
+6
+00:00:35,200 --> 00:00:40,200
+Twenty-five real-world misuse findings — hardcoded keys, weak modes, disabled TLS checks. Click a severity to filter.
+
+7
+00:00:40,200 --> 00:00:46,200
+Five critical findings, isolated instantly — each with the exact line, the fix, and the CWE.
+
+8
+00:00:46,200 --> 00:00:53,200
+Post-quantum readiness: a crypto-agility score, a quantum-risk timeline, and migration waves sequenced by effort.
+
+9
+00:00:53,200 --> 00:00:58,200
+The Mosca Lab lets you model your own assumptions — how long data must stay secret, how long migration takes.
+
+10
+00:00:58,200 --> 00:01:05,200
+Switch to the EU-2030 regulator preset — assumptions tighten, and twenty-four of forty-six assets fall at risk. Everything recomputes live.
+
+11
+00:01:05,200 --> 00:01:12,200
+And nothing here is a black box — every color, every score, every rating is explained, right in the console.
+
+12
+00:01:12,200 --> 00:01:18,200
+Export the CBOM, SARIF, and report — fully offline, ready for a GRC platform, a SIEM, or your CI pipeline.
